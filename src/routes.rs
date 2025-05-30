@@ -14,11 +14,12 @@
 
 use std::sync::Arc;
 
-use axum::routing::{delete, get, post};
-use axum::Router;
+use axum::{
+    routing::{delete, get, post},
+    Router,
+};
 
-use crate::context::Context;
-use crate::handlers::workflow;
+use crate::{context::Context, handlers::workflow};
 
 pub fn build() -> Router<Arc<Context>> {
     Router::new()

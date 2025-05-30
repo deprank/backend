@@ -16,15 +16,18 @@ use std::sync::Arc;
 
 use uuid::Uuid;
 
-use crate::context::Context;
-use crate::errors::Result;
-use crate::requests::workflow::CreateWorkflowRequest;
-use crate::responses::workflow::WorkflowResponse;
+use crate::{
+    context::Context, errors::Result, requests::workflow::CreateWorkflowRequest,
+    responses::workflow::WorkflowResponse,
+};
 
 pub struct WorkflowService;
 
 impl WorkflowService {
-    pub async fn create(_ctx: Arc<Context>, _req: &CreateWorkflowRequest) -> Result<WorkflowResponse> {
+    pub async fn create(
+        _ctx: Arc<Context>,
+        _req: &CreateWorkflowRequest,
+    ) -> Result<WorkflowResponse> {
         todo!()
     }
 

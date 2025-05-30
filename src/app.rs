@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::net::SocketAddr;
-use std::sync::Arc;
+use std::{net::SocketAddr, sync::Arc};
 
-use crate::context::Context;
-use crate::{routes, swagger};
+use crate::{context::Context, routes, swagger};
 
 pub async fn run(ctx: Arc<Context>) {
     let port = ctx.config.port;
