@@ -14,17 +14,18 @@
 
 use std::sync::Arc;
 
-use axum::extract::{Path, State};
-use axum::http::StatusCode;
-use axum::response::IntoResponse;
-use axum::Json;
+use axum::{
+    extract::{Path, State},
+    http::StatusCode,
+    response::IntoResponse,
+    Json,
+};
 use uuid::Uuid;
 
-use crate::context::Context;
-use crate::errors::Result;
-use crate::requests::workflow::CreateWorkflowRequest;
-use crate::responses::workflow::WorkflowResponse;
-use crate::services::WorkflowService;
+use crate::{
+    context::Context, errors::Result, requests::workflow::CreateWorkflowRequest,
+    responses::workflow::WorkflowResponse, services::workflow::WorkflowService,
+};
 
 // The Workflow Service Handlers.
 
@@ -61,7 +62,10 @@ pub async fn create(
     ),
     tag = "Workflows"
 )]
-pub async fn delete(State(ctx): State<Arc<Context>>, Path(id): Path<Uuid>) -> Result<impl IntoResponse> {
+pub async fn delete(
+    State(ctx): State<Arc<Context>>,
+    Path(id): Path<Uuid>,
+) -> Result<impl IntoResponse> {
     WorkflowService::delete(ctx, id).await?;
 
     Ok(StatusCode::NO_CONTENT)
@@ -80,6 +84,9 @@ pub async fn delete(State(ctx): State<Arc<Context>>, Path(id): Path<Uuid>) -> Re
     ),
     tag = "Workflows"
 )]
-pub async fn get(State(ctx): State<Arc<Context>>, Path(id): Path<Uuid>) -> Result<impl IntoResponse> {
+pub async fn get(
+    State(ctx): State<Arc<Context>>,
+    Path(id): Path<Uuid>,
+) -> Result<impl IntoResponse> {
     Ok((StatusCode::CREATED, Json(WorkflowService::get(ctx, id).await?)))
 }

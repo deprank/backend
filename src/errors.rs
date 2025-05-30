@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use axum::http::StatusCode;
-use axum::response::IntoResponse;
-use axum::Json;
+use axum::{http::StatusCode, response::IntoResponse, Json};
 use serde_json::json;
 use thiserror::Error;
 use tracing::error;

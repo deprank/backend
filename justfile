@@ -15,8 +15,12 @@ clippy:
    cargo clippy --workspace --all-features --tests --bins --benches -- -D warnings
 
 # Check formatting
-fmt:
+check-fmt:
     cargo +nightly fmt --all -- --check
+
+# Fix formatting
+fmt:
+    cargo +nightly fmt --all
 
 # Test the project
 test:
@@ -24,7 +28,7 @@ test:
 
 # Run all the checks
 check:
-    just fmt
+    just check-fmt
     just clippy
     just test
 
