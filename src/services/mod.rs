@@ -14,5 +14,5 @@
 
 pub mod analyzer;
 pub mod contracts;
-pub mod github_repo;
+pub mod storage;
 pub mod workflow;

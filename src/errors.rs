@@ -44,6 +44,9 @@ pub enum ApiError {
 
     #[error("Bad Workflow Request: {0}")]
     BadWorkflowRequest(String),
+
+    #[error("Failed to download repository: {0}")]
+    FailedToDownloadRepo(String),
 }
 
 impl IntoResponse for ApiError {
@@ -57,6 +60,7 @@ impl IntoResponse for ApiError {
             Self::InvalidRepoAddress(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
             Self::NotFoundRepo(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
             Self::BadWorkflowRequest(e) => (StatusCode::BAD_REQUEST, e.to_string()),
+            Self::FailedToDownloadRepo(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
         };
 
         error!("{} - {}", status, message);
