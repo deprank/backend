@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod analyzer;
 pub mod contracts;
 pub mod storage;
 pub mod workflow;

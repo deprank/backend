@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub mod analyzers;
 pub mod app;
 pub mod config;
 pub mod context;
