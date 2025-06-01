@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub mod allocation;
 pub mod impls;
 pub mod inquire;
 pub mod receipt;
