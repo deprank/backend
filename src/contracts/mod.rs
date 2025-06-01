@@ -13,6 +13,7 @@
 // limitations under the License.
 
 pub mod impls;
+pub mod inquire;
 pub mod receipt;
 pub mod sign;
 pub mod types;
