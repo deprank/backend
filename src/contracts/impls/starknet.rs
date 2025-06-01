@@ -32,6 +32,16 @@ use starknet_ff::FieldElement;
 use std::{env, sync::Arc};
 use tracing::{error, info};
 
+use crate::contracts::{
+    allocation::{Allocation, AllocationContract, Status as AllocationStatus},
+    inquire::{Inquire, InquireContract},
+    receipt::{Receipt, ReceiptContract, ReceiptMetadata},
+    sign::{Sign, SignContract},
+    types::*,
+    workflow::{Dependency, Step, Workflow, WorkflowContract},
+    Contract,
+};
+
 // Global provider
 static PROVIDER: Lazy<Arc<JsonRpcClient<HttpTransport>>> = Lazy::new(|| {
     let rpc_url =
@@ -110,7 +120,7 @@ pub struct ReceiptDetails {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ReceiptMetadata {
+pub struct StarkReceiptMetadata {
     pub name: FieldElement,
     pub version: FieldElement,
     pub author: FieldElement,
@@ -245,4 +255,204 @@ pub async fn create_workflow(
     info!("https://sepolia.starkscan.co/tx/0x{:x}", tx_result.transaction_hash);
 
     Ok(())
+}
+
+pub struct StarknetContract;
+
+impl Contract for StarknetContract {
+    fn chain() -> &'static str {
+        "Starknet"
+    }
+}
+
+impl AllocationContract for StarknetContract {
+    fn create_allocation(
+        &self,
+        _workflow_id: Id,
+        _sign_id: Id,
+        _recipient: Address,
+        _amount: Number,
+        _token_address: Address,
+    ) -> Id {
+        todo!()
+    }
+
+    fn update_allocation_status(&self, _allocation_id: Id, _status: AllocationStatus) -> bool {
+        todo!()
+    }
+
+    fn get_allocation_details(&self, _allocation_id: Id) -> Allocation {
+        todo!()
+    }
+
+    fn get_allocation_by_sign(&self, _sign_id: Id) -> Id {
+        todo!()
+    }
+}
+
+impl InquireContract for StarknetContract {
+    fn create_inquire(
+        &self,
+        _workflow_id: Id,
+        _inquirer: Address,
+        _inquiree: Address,
+        _question: String,
+    ) -> Id {
+        todo!()
+    }
+
+    fn respond_to_inquire(&self, _inquire_id: Id, _response: String) -> bool {
+        todo!()
+    }
+
+    fn reject_inquire(&self, _inquire_id: Id) -> bool {
+        todo!()
+    }
+
+    fn get_inquire_details(&self, _inquire_id: Id) -> Inquire {
+        todo!()
+    }
+}
+
+impl ReceiptContract for StarknetContract {
+    fn create_receipt(
+        &self,
+        _workflow_id: Id,
+        _dependency_url: String,
+        _metadata: ReceiptMetadata,
+        _metadata_hash: Hash,
+        _metadata_uri: Hash,
+    ) -> Id {
+        todo!()
+    }
+
+    fn get_receipt_details(&self, _receipt_id: Id) -> (Receipt, ReceiptMetadata) {
+        todo!()
+    }
+
+    fn verify_metadata(&self, _receipt_id: Id, _provided_hash: Hash) -> bool {
+        todo!()
+    }
+
+    fn update_tx_hash(&self, _receipt_id: Id, _tx_hash: Hash) {
+        todo!()
+    }
+}
+
+impl SignContract for StarknetContract {
+    fn create_sign(
+        &self,
+        _workflow_id: Id,
+        _inquire_id: Id,
+        _signer: Address,
+        _signature_hash: Hash,
+    ) -> Id {
+        todo!()
+    }
+
+    fn get_sign_details(&self, _sign_id: Id) -> Sign {
+        todo!()
+    }
+
+    fn get_sign_by_inquire(&self, _inquire_id: Id) -> Id {
+        todo!()
+    }
+}
+
+impl WorkflowContract for StarknetContract {
+    fn create_workflow(&self, _github_owner: Owner, _wallet_address: Address) -> Id {
+        todo!()
+    }
+
+    fn create_dependency(
+        &self,
+        _github_owner: Owner,
+        _workflow_id: Id,
+        _name: String,
+        _repository_url: String,
+        _license: String,
+        _metadata_json: String,
+    ) -> Id {
+        todo!()
+    }
+
+    fn add_step(
+        &self,
+        _github_owner: Owner,
+        _workflow_id: Id,
+        _dependency_index: Id,
+        _step_type: String,
+        _tx_hash: Hash,
+        _related_entity_id: Id,
+    ) -> Id {
+        todo!()
+    }
+
+    fn finish_dependency(
+        &self,
+        _github_owner: Owner,
+        _workflow_id: Id,
+        _dependency_idx: Id,
+    ) -> bool {
+        todo!()
+    }
+
+    fn finish_workflow(&self, _github_owner: Owner, _workflow_id: Id) -> bool {
+        todo!()
+    }
+
+    fn get_workflow_status(&self, _github_owner: Owner, _workflow_id: Id) -> Workflow {
+        todo!()
+    }
+
+    fn get_dependencies(&self, _github_owner: Owner, _workflow_id: Id) -> Vec<Dependency> {
+        todo!()
+    }
+
+    fn get_steps(&self, _github_owner: Owner, _workflow_id: Id, _dependency_idx: Id) -> Vec<Step> {
+        todo!()
+    }
+
+    fn get_step_by_tx_hash(&self, _tx_hash: Hash) -> Option<(Owner, Id, Id, Id)> {
+        todo!()
+    }
+
+    fn get_complete_transaction_chain(
+        &self,
+        _github_owner: Owner,
+        _workflow_id: Id,
+        _dependency_idx: Id,
+    ) -> Vec<Hash> {
+        todo!()
+    }
+
+    fn get_workflow_count(&self, _github_owner: Owner) -> Number {
+        todo!()
+    }
+
+    fn get_all_workflows(&self, _github_owner: Owner) -> Vec<(Number, Workflow)> {
+        todo!()
+    }
+
+    fn bind_wallet_address(
+        &self,
+        _github_owner: Owner,
+        _workflow_id: Id,
+        _wallet_address: Address,
+    ) -> bool {
+        todo!()
+    }
+
+    fn unbind_wallet_address(&self, _github_owner: Owner, _workflow_id: Id) -> bool {
+        todo!()
+    }
+
+    fn change_wallet_address(
+        &self,
+        _github_owner: Owner,
+        _workflow_id: Id,
+        _new_wallet_address: Address,
+    ) -> bool {
+        todo!()
+    }
 }

@@ -19,3 +19,13 @@ pub mod receipt;
 pub mod sign;
 pub mod types;
 pub mod workflow;
+
+pub trait Contract:
+    allocation::AllocationContract
+    + inquire::InquireContract
+    + receipt::ReceiptContract
+    + sign::SignContract
+    + workflow::WorkflowContract
+{
+    fn chain() -> &'static str;
+}
