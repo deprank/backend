@@ -12,7 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod analyzer;
-pub mod contract;
-pub mod storage;
-pub mod workflow;
+use std::path::{Path, PathBuf};
+
+use anyhow::Result;
+
+#[allow(dead_code)]
+pub struct AnalyzerService {
+    cache_dir: PathBuf,
+}
+
+impl AnalyzerService {
+    pub fn new(cache_dir: &Path) -> Self {
+        Self { cache_dir: cache_dir.to_path_buf() }
+    }
+
+    pub async fn analyze(&self, _dir: &Path) -> Result<()> {
+        todo!()
+    }
+}
