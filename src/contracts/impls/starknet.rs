@@ -19,7 +19,7 @@ use starknet::{
     accounts::{Account, ExecutionEncoding, SingleOwnerAccount},
     core::{
         chain_id,
-        types::{BlockId, BlockTag, Call, Felt, FunctionCall},
+        types::{BlockId, BlockTag, Call, Felt, FunctionCall, InvokeTransactionResult},
     },
     providers::{
         jsonrpc::{HttpTransport, JsonRpcClient},
@@ -171,21 +171,32 @@ pub async fn get_account(
 }
 
 pub struct StarknetContract {
-    contract_address: Felt,
+    workflow_contract_address: Felt,
 }
 
 impl StarknetContract {
-    pub fn new(contract_address: &str) -> Self {
-        let contract_address = Felt::from_hex(contract_address).expect("Invalid contract address");
+    #[allow(clippy::new_without_default)]
+    pub fn new() -> Self {
+        // Get contract address from environment variable
+        let workflow_contract_address_str = env::var("WORKFLOW_CONTRACT_ADDRESS")
+            .expect("WORKFLOW_CONTRACT_ADDRESS environment variable must be set");
+        info!("Contract address read from environment variable: {}", workflow_contract_address_str);
 
-        Self { contract_address }
+        let workflow_contract_address =
+            Felt::from_hex(&workflow_contract_address_str).expect("Invalid contract address");
+
+        Self { workflow_contract_address }
     }
 
-    /// call contract function
-    async fn call(&self, selector: Felt, calldata: Vec<Felt>) -> Result<Vec<Felt>> {
-        // Create function call object
+    /// Call contract function (read-only operation)
+    async fn call(
+        &self,
+        contract_address: &Felt,
+        selector: Felt,
+        calldata: Vec<Felt>,
+    ) -> Result<Vec<Felt>> {
         let function_call = FunctionCall {
-            contract_address: self.contract_address,
+            contract_address: *contract_address,
             entry_point_selector: selector,
             calldata,
         };
@@ -199,6 +210,41 @@ impl StarknetContract {
             }
             Err(e) => Err(anyhow!("Contract call failed: {:?}", e)),
         }
+    }
+
+    /// Execute transaction
+    async fn execute(
+        &self,
+        contract_address: &Felt,
+        selector: &str,
+        calldata: Vec<Felt>,
+    ) -> Result<InvokeTransactionResult> {
+        debug!(
+            "Execute transaction, contract_address: {}, selector: {}, calldata: {:?}",
+            contract_address, selector, calldata
+        );
+
+        let selector = Felt::from_hex(selector).expect("Invalid selector");
+
+        // First try read-only call to validate function
+        if let Err(e) = self.call(contract_address, selector, calldata.clone()).await {
+            info!("Read-only call validation failed, aborting transaction");
+            return Err(e);
+        }
+
+        // Create function call object
+        let calls = vec![Call { to: *contract_address, selector, calldata }];
+
+        // Execute transaction
+        let account = get_account().await?;
+        let result = account.execute_v3(calls).send().await?;
+        info!("Transaction sent! Transaction hash: 0x{:x}", result.transaction_hash);
+
+        // Print Starkscan link
+        info!("Transaction submitted to network. View transaction status on Starkscan:");
+        info!("https://sepolia.starkscan.co/tx/0x{:x}", result.transaction_hash);
+
+        Ok(result)
     }
 }
 
@@ -302,54 +348,24 @@ impl SignContract for StarknetContract {
     }
 }
 
+// Entrypoint selectors of the function being invoked.
+const SELECTOR_CREATE_WORKFLOW: &str =
+    "0x5911913ce5ab907c3a2d99993ea1a79752241ca82352c7962c5c228d183b6e";
+
 impl WorkflowContract for StarknetContract {
     async fn create_workflow(&self, github_owner: Owner, wallet_address: Address) -> Result<Id> {
-        info!(
-            "Starting workflow creation, github_owner: {}, wallet_address: {}",
-            github_owner, wallet_address
-        );
+        info!("Starting workflow creation");
 
-        // Get account
-        let account = get_account().await?;
-
-        // Get contract address from environment variable
-        // let contract_address_str = env::var("WORKFLOW_CONTRACT_ADDRESS")
-        //     .expect("WORKFLOW_CONTRACT_ADDRESS environment variable must be set");
-        // info!("Contract address read from environment variable: {}", contract_address_str);
-
-        // Convert string to felt, ensuring proper encoding
         let github_owner = Felt::from_str(&github_owner).expect("Invalid GitHub username");
-        debug!("Converted github_owner: {:?}", github_owner);
-
-        // Process wallet address parameter
         let wallet_address = Felt::from_hex(&wallet_address).expect("Invalid wallet address");
-        debug!("Converted wallet address: {:?}", wallet_address);
 
-        // Use correct function selector
-        let selector =
-            Felt::from_hex("0x5911913ce5ab907c3a2d99993ea1a79752241ca82352c7962c5c228d183b6e")
-                .expect("Invalid selector");
-
-        // Prepare call parameters
-        let calldata = vec![github_owner, wallet_address];
-
-        // First try read-only call to validate function
-        if let Err(e) = self.call(selector, calldata.clone()).await {
-            info!("Read-only call validation failed, aborting transaction");
-            return Err(e);
-        }
-
-        // Create function call object
-        let calls = vec![Call { to: self.contract_address, selector, calldata }];
-
-        // Execute transaction
-        info!("Sending create_workflow transaction...");
-        let tx_result = account.execute_v3(calls).send().await?;
-        info!("Transaction sent! Transaction hash: 0x{:x}", tx_result.transaction_hash);
-
-        // Print Starkscan link
-        info!("Transaction submitted to network. View transaction status on Starkscan:");
-        info!("https://sepolia.starkscan.co/tx/0x{:x}", tx_result.transaction_hash);
+        let _ = self
+            .execute(
+                &self.workflow_contract_address,
+                SELECTOR_CREATE_WORKFLOW,
+                vec![github_owner, wallet_address],
+            )
+            .await?;
 
         Ok(Id::new())
     }
