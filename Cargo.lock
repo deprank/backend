@@ -573,7 +573,6 @@ dependencies = [
  "clap",
  "dotenv",
  "ghrepo",
- "once_cell",
  "regex",
  "serde",
  "serde_json",

@@ -13,14 +13,10 @@
 // limitations under the License.
 
 use anyhow::{anyhow, Result};
-use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use starknet::{
     accounts::{Account, ExecutionEncoding, SingleOwnerAccount},
-    core::{
-        chain_id,
-        types::{BlockId, BlockTag, Call, Felt, FunctionCall, InvokeTransactionResult},
-    },
+    core::types::{BlockId, BlockTag, Call, Felt, FunctionCall, InvokeTransactionResult},
     providers::{
         jsonrpc::{HttpTransport, JsonRpcClient},
         Provider, Url,
@@ -28,7 +24,7 @@ use starknet::{
     signers::{LocalWallet, SigningKey},
 };
 use starknet_ff::FieldElement;
-use std::{env, str::FromStr, sync::Arc};
+use std::str::FromStr;
 use tracing::{debug, info};
 
 use crate::contracts::{
@@ -41,15 +37,9 @@ use crate::contracts::{
     Contract,
 };
 
-// Global provider
-static PROVIDER: Lazy<Arc<JsonRpcClient<HttpTransport>>> = Lazy::new(|| {
-    let rpc_url =
-        env::var("STARKNET_RPC_URL").expect("STARKNET_RPC_URL environment variable must be set");
-    let provider = JsonRpcClient::new(HttpTransport::new(
-        Url::parse(&rpc_url).expect("Invalid RPC URL format"),
-    ));
-    Arc::new(provider)
-});
+// Entrypoint selectors of the function being invoked.
+const SELECTOR_CREATE_WORKFLOW: &str =
+    "0x5911913ce5ab907c3a2d99993ea1a79752241ca82352c7962c5c228d183b6e";
 
 // Struct definitions corresponding to contract structs
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -137,55 +127,75 @@ pub struct SignDetails {
     pub created_at: u64,
 }
 
-/// Public method to get account
-pub async fn get_account(
-) -> Result<SingleOwnerAccount<JsonRpcClient<HttpTransport>, LocalWallet>, anyhow::Error> {
-    // Get private key from environment variable
-    let private_key = env::var("STARKNET_PRIVATE_KEY")
-        .expect("STARKNET_PRIVATE_KEY environment variable must be set");
-    info!("Private key read from environment variable");
+#[derive(Clone, clap::Parser)]
+pub struct StarknetConfig {
+    /// URL of the Starknet JSON-RPC endpoint
+    #[clap(long, env = "STARKNET_RPC_URL")]
+    pub starknet_rpc_url: String,
 
-    // Set up wallet
-    let key_pair =
-        SigningKey::from_secret_scalar(Felt::from_hex(&private_key).expect("Invalid private key"));
-    let signer = LocalWallet::from_signing_key(key_pair);
+    /// Private key of the Starknet account
+    #[clap(long, env = "STARKNET_PRIVATE_KEY")]
+    pub starknet_private_key: String,
 
-    // Get account address from environment variable
-    let account_address_str = env::var("STARKNET_ACCOUNT_ADDRESS")
-        .expect("STARKNET_ACCOUNT_ADDRESS environment variable must be set");
-    info!("Account address read from environment variable");
+    /// Address of the Starknet account
+    #[clap(long, env = "STARKNET_ACCOUNT_ADDRESS")]
+    pub starknet_account_address: String,
 
-    let account_address = Felt::from_hex(&account_address_str).expect("Invalid account address");
-    let chain_id = chain_id::SEPOLIA; // Using predefined Sepolia chain ID
+    /// Chain ID of the Starknet network
+    #[clap(long, env = "STARKNET_CHAIN_ID")]
+    pub starknet_chain_id: String,
 
-    // Create account object
-    let account = SingleOwnerAccount::new(
-        PROVIDER.as_ref().clone(),
-        signer,
-        account_address,
-        chain_id,
-        ExecutionEncoding::New,
-    );
-
-    Ok(account)
+    /// Address of the Workflow contract
+    #[clap(long, env = "WORKFLOW_CONTRACT_ADDRESS")]
+    pub workflow_contract_address: String,
 }
 
+/// Starknet implementation of the Contract trait
+///
+/// This struct provides concrete implementations for all contract operations
+/// on the Starknet blockchain, including workflow management, allocations,
+/// inquiries, receipts, and signatures.
 pub struct StarknetContract {
+    /// JSON-RPC client for Starknet network
+    provider: JsonRpcClient<HttpTransport>,
+
+    /// Starknet account with signing capability
+    account: SingleOwnerAccount<JsonRpcClient<HttpTransport>, LocalWallet>,
+
+    /// Address of the Workflow contract
     workflow_contract_address: Felt,
 }
 
 impl StarknetContract {
-    #[allow(clippy::new_without_default)]
-    pub fn new() -> Self {
-        // Get contract address from environment variable
-        let workflow_contract_address_str = env::var("WORKFLOW_CONTRACT_ADDRESS")
-            .expect("WORKFLOW_CONTRACT_ADDRESS environment variable must be set");
-        info!("Contract address read from environment variable: {}", workflow_contract_address_str);
+    pub fn new(config: &StarknetConfig) -> Self {
+        // Create provider used to access to the Starknet network.
+        let provider = JsonRpcClient::new(HttpTransport::new(
+            Url::parse(&config.starknet_rpc_url).expect("Invalid Starknet RPC URL format"),
+        ));
 
-        let workflow_contract_address =
-            Felt::from_hex(&workflow_contract_address_str).expect("Invalid contract address");
+        // Create account object.
+        let key_pair = SigningKey::from_secret_scalar(
+            Felt::from_hex(&config.starknet_private_key).expect("Invalid Starknet private key"),
+        );
+        let signer = LocalWallet::from_signing_key(key_pair);
+        let account_address = Felt::from_hex(&config.starknet_account_address)
+            .expect("Invalid Starknet account address");
+        let chain_id =
+            Felt::from_str(&config.starknet_chain_id).expect("Invalid Starknet chain id");
 
-        Self { workflow_contract_address }
+        let account = SingleOwnerAccount::new(
+            provider.clone(),
+            signer,
+            account_address,
+            chain_id,
+            ExecutionEncoding::New,
+        );
+
+        // parse contract addresses.
+        let workflow_contract_address = Felt::from_hex(&config.workflow_contract_address)
+            .expect("Invalid workflow contract address");
+
+        Self { provider, account, workflow_contract_address }
     }
 
     /// Call contract function (read-only operation)
@@ -203,7 +213,7 @@ impl StarknetContract {
 
         info!("Attempting contract call (read-only operation)...");
 
-        match PROVIDER.as_ref().call(function_call, BlockId::Tag(BlockTag::Latest)).await {
+        match self.provider.call(function_call, BlockId::Tag(BlockTag::Latest)).await {
             Ok(result) => {
                 info!("Call successful! Result: {:?}", result);
                 Ok(result)
@@ -236,8 +246,7 @@ impl StarknetContract {
         let calls = vec![Call { to: *contract_address, selector, calldata }];
 
         // Execute transaction
-        let account = get_account().await?;
-        let result = account.execute_v3(calls).send().await?;
+        let result = self.account.execute_v3(calls).send().await?;
         info!("Transaction sent! Transaction hash: 0x{:x}", result.transaction_hash);
 
         // Print Starkscan link
@@ -347,10 +356,6 @@ impl SignContract for StarknetContract {
         todo!()
     }
 }
-
-// Entrypoint selectors of the function being invoked.
-const SELECTOR_CREATE_WORKFLOW: &str =
-    "0x5911913ce5ab907c3a2d99993ea1a79752241ca82352c7962c5c228d183b6e";
 
 impl WorkflowContract for StarknetContract {
     async fn create_workflow(&self, github_owner: Owner, wallet_address: Address) -> Result<Id> {

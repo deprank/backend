@@ -26,9 +26,15 @@
 //
 // See `.env.sample` in the repository root for details.
 
+use crate::contracts::impls::starknet::StarknetConfig;
+
 #[derive(Clone, clap::Parser)]
 pub struct Config {
     /// The Server port.
-    #[clap(long, env = "DRK_PORT")]
+    #[clap(long, env = "DRK_PORT", default_value = "8080")]
     pub port: u16,
+
+    /// The Starknet configuration.
+    #[clap(flatten)]
+    pub starknet_config: StarknetConfig,
 }
