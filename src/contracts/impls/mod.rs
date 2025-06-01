@@ -12,6 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod impls;
-pub mod types;
-pub mod workflow;
+pub mod starknet;
