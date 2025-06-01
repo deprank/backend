@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::future::Future;
+
+use anyhow::Result;
+
 use super::types::{Address, Hash, Id, Number, Owner};
 
 #[allow(dead_code)]
@@ -64,7 +68,11 @@ pub enum Status {
 /// Workflow contract interface
 pub trait WorkflowContract {
     /// Create workflow
-    fn create_workflow(&self, github_owner: Owner, wallet_address: Address) -> Id;
+    fn create_workflow(
+        &self,
+        github_owner: Owner,
+        wallet_address: Address,
+    ) -> impl Future<Output = Result<Id>>;
 
     /// Create dependency
     fn create_dependency(

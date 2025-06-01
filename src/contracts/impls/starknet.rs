@@ -20,7 +20,6 @@ use starknet::{
     core::{
         chain_id,
         types::{BlockId, BlockTag, Call, Felt, FunctionCall},
-        utils::cairo_short_string_to_felt,
     },
     providers::{
         jsonrpc::{HttpTransport, JsonRpcClient},
@@ -29,8 +28,8 @@ use starknet::{
     signers::{LocalWallet, SigningKey},
 };
 use starknet_ff::FieldElement;
-use std::{env, sync::Arc};
-use tracing::{error, info};
+use std::{env, str::FromStr, sync::Arc};
+use tracing::{debug, info};
 
 use crate::contracts::{
     allocation::{Allocation, AllocationContract, Status as AllocationStatus},
@@ -171,93 +170,37 @@ pub async fn get_account(
     Ok(account)
 }
 
-/// Public method for contract calls
-pub async fn call_contract_function(
+pub struct StarknetContract {
     contract_address: Felt,
-    selector: Felt,
-    calldata: Vec<Felt>,
-) -> Result<Vec<Felt>, anyhow::Error> {
-    // Create function call object
-    let function_call = FunctionCall { contract_address, entry_point_selector: selector, calldata };
+}
 
-    info!("Attempting contract call (read-only operation)...");
+impl StarknetContract {
+    pub fn new(contract_address: &str) -> Self {
+        let contract_address = Felt::from_hex(contract_address).expect("Invalid contract address");
 
-    match PROVIDER.as_ref().call(function_call, BlockId::Tag(BlockTag::Latest)).await {
-        Ok(result) => {
-            info!("Call successful! Result: {:?}", result);
-            Ok(result)
-        }
-        Err(e) => {
-            error!("Call failed: {:?}", e);
-            error!("This may indicate incorrect parameter format or non-existent function, please check before attempting to send transaction");
-            Err(anyhow!("Contract call failed: {:?}", e))
+        Self { contract_address }
+    }
+
+    /// call contract function
+    async fn call(&self, selector: Felt, calldata: Vec<Felt>) -> Result<Vec<Felt>> {
+        // Create function call object
+        let function_call = FunctionCall {
+            contract_address: self.contract_address,
+            entry_point_selector: selector,
+            calldata,
+        };
+
+        info!("Attempting contract call (read-only operation)...");
+
+        match PROVIDER.as_ref().call(function_call, BlockId::Tag(BlockTag::Latest)).await {
+            Ok(result) => {
+                info!("Call successful! Result: {:?}", result);
+                Ok(result)
+            }
+            Err(e) => Err(anyhow!("Contract call failed: {:?}", e)),
         }
     }
 }
-
-/// Create workflow
-pub async fn create_workflow(
-    github_owner_str: &str,
-    wallet_address_str: &str,
-) -> Result<(), anyhow::Error> {
-    info!(
-        "Starting workflow creation, github_owner: {}, wallet_address: {}",
-        github_owner_str, wallet_address_str
-    );
-
-    // Get account
-    let account = get_account().await?;
-
-    // Get contract address from environment variable
-    let contract_address_str = env::var("WORKFLOW_CONTRACT_ADDRESS")
-        .expect("WORKFLOW_CONTRACT_ADDRESS environment variable must be set");
-    info!("Contract address read from environment variable: {}", contract_address_str);
-
-    let contract_address = Felt::from_hex(&contract_address_str).expect("Invalid contract address");
-
-    // Convert string to felt, ensuring proper encoding
-    let github_owner =
-        cairo_short_string_to_felt(github_owner_str).expect("Invalid GitHub username");
-    info!("Converted github_owner: {:?}", github_owner);
-
-    // Process wallet address parameter
-    let wallet_address = Felt::from_hex(wallet_address_str).expect("Invalid wallet address");
-    info!("Wallet address: {:?}", wallet_address);
-
-    // Use correct function selector
-    let function_selector =
-        Felt::from_hex("0x5911913ce5ab907c3a2d99993ea1a79752241ca82352c7962c5c228d183b6e")
-            .expect("Invalid selector");
-
-    // Prepare call parameters
-    let calldata = vec![github_owner, wallet_address];
-
-    // First try read-only call to validate function
-    let _result =
-        match call_contract_function(contract_address, function_selector, calldata.clone()).await {
-            Ok(result) => result,
-            Err(e) => {
-                info!("Read-only call validation failed, aborting transaction");
-                return Err(e);
-            }
-        };
-
-    // Create function call object
-    let calls = vec![Call { to: contract_address, selector: function_selector, calldata }];
-
-    // Execute transaction
-    info!("Sending create_workflow transaction...");
-    let tx_result = account.execute_v3(calls).send().await?;
-    info!("Transaction sent! Transaction hash: 0x{:x}", tx_result.transaction_hash);
-
-    // Print Starkscan link
-    info!("Transaction submitted to network. View transaction status on Starkscan:");
-    info!("https://sepolia.starkscan.co/tx/0x{:x}", tx_result.transaction_hash);
-
-    Ok(())
-}
-
-pub struct StarknetContract;
 
 impl Contract for StarknetContract {
     fn chain() -> &'static str {
@@ -360,8 +303,55 @@ impl SignContract for StarknetContract {
 }
 
 impl WorkflowContract for StarknetContract {
-    fn create_workflow(&self, _github_owner: Owner, _wallet_address: Address) -> Id {
-        todo!()
+    async fn create_workflow(&self, github_owner: Owner, wallet_address: Address) -> Result<Id> {
+        info!(
+            "Starting workflow creation, github_owner: {}, wallet_address: {}",
+            github_owner, wallet_address
+        );
+
+        // Get account
+        let account = get_account().await?;
+
+        // Get contract address from environment variable
+        // let contract_address_str = env::var("WORKFLOW_CONTRACT_ADDRESS")
+        //     .expect("WORKFLOW_CONTRACT_ADDRESS environment variable must be set");
+        // info!("Contract address read from environment variable: {}", contract_address_str);
+
+        // Convert string to felt, ensuring proper encoding
+        let github_owner = Felt::from_str(&github_owner).expect("Invalid GitHub username");
+        debug!("Converted github_owner: {:?}", github_owner);
+
+        // Process wallet address parameter
+        let wallet_address = Felt::from_hex(&wallet_address).expect("Invalid wallet address");
+        debug!("Converted wallet address: {:?}", wallet_address);
+
+        // Use correct function selector
+        let selector =
+            Felt::from_hex("0x5911913ce5ab907c3a2d99993ea1a79752241ca82352c7962c5c228d183b6e")
+                .expect("Invalid selector");
+
+        // Prepare call parameters
+        let calldata = vec![github_owner, wallet_address];
+
+        // First try read-only call to validate function
+        if let Err(e) = self.call(selector, calldata.clone()).await {
+            info!("Read-only call validation failed, aborting transaction");
+            return Err(e);
+        }
+
+        // Create function call object
+        let calls = vec![Call { to: self.contract_address, selector, calldata }];
+
+        // Execute transaction
+        info!("Sending create_workflow transaction...");
+        let tx_result = account.execute_v3(calls).send().await?;
+        info!("Transaction sent! Transaction hash: 0x{:x}", tx_result.transaction_hash);
+
+        // Print Starkscan link
+        info!("Transaction submitted to network. View transaction status on Starkscan:");
+        info!("https://sepolia.starkscan.co/tx/0x{:x}", tx_result.transaction_hash);
+
+        Ok(Id::new())
     }
 
     fn create_dependency(
