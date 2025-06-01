@@ -12,16 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod analyzers;
-pub mod app;
-pub mod config;
-pub mod context;
-pub mod contracts;
-pub mod errors;
-pub mod handlers;
-pub mod requests;
-pub mod responses;
-pub mod routes;
-pub mod services;
-pub mod swagger;
-pub mod utils;
+pub mod starknet;
