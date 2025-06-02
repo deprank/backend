@@ -673,8 +673,21 @@ impl WorkflowContract for StarknetContract {
         Ok(true)
     }
 
-    fn unbind_wallet_address(&self, _github_owner: Owner, _workflow_id: Id) -> bool {
-        todo!()
+    async fn unbind_wallet_address(&self, github_owner: Owner, workflow_id: Id) -> Result<bool> {
+        info!("Starting unbind wallet address");
+
+        let github_owner = Felt::from_str(&github_owner).expect("Invalid GitHub username");
+        let workflow_id = Felt::from_str(&workflow_id).expect("Invalid workflow id");
+
+        let _ = self
+            .execute(
+                &self.workflow_contract_address,
+                &selector!("unbind_wallet_address"),
+                vec![github_owner, workflow_id],
+            )
+            .await?;
+
+        Ok(true)
     }
 
     fn change_wallet_address(
