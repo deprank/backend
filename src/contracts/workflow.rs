@@ -163,7 +163,10 @@ pub trait WorkflowContract {
     fn get_workflow_count(&self, github_owner: Owner) -> impl Future<Output = Result<Number>>;
 
     /// Get all user workflows
-    fn get_all_workflows(&self, github_owner: Owner) -> Vec<(Number, Workflow)>;
+    fn get_all_workflows(
+        &self,
+        github_owner: Owner,
+    ) -> impl Future<Output = Result<Vec<(Number, Workflow)>>>;
 
     /// Bind multisig wallet address to workflow
     fn bind_wallet_address(

@@ -634,7 +634,19 @@ impl WorkflowContract for StarknetContract {
         Ok(count.to_string())
     }
 
-    fn get_all_workflows(&self, _github_owner: Owner) -> Vec<(Number, Workflow)> {
+    async fn get_all_workflows(&self, github_owner: Owner) -> Result<Vec<(Number, Workflow)>> {
+        info!("Starting get all workflows");
+
+        let github_owner = Felt::from_str(&github_owner).expect("Invalid GitHub username");
+
+        let _result = self
+            .call(
+                &self.workflow_contract_address,
+                &selector!("get_all_workflows"),
+                vec![github_owner],
+            )
+            .await?;
+
         todo!()
     }
 

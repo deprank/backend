@@ -250,8 +250,8 @@ impl WorkflowContract for ContractService {
         self.instance.get_workflow_count(github_owner).await
     }
 
-    fn get_all_workflows(&self, github_owner: Owner) -> Vec<(Number, Workflow)> {
-        self.instance.get_all_workflows(github_owner)
+    async fn get_all_workflows(&self, github_owner: Owner) -> Result<Vec<(Number, Workflow)>> {
+        self.instance.get_all_workflows(github_owner).await
     }
 
     fn bind_wallet_address(
