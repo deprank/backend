@@ -222,8 +222,13 @@ impl WorkflowContract for ContractService {
         self.instance.get_dependencies(github_owner, workflow_id).await
     }
 
-    fn get_steps(&self, github_owner: Owner, workflow_id: Id, dependency_idx: Id) -> Vec<Step> {
-        self.instance.get_steps(github_owner, workflow_id, dependency_idx)
+    async fn get_steps(
+        &self,
+        github_owner: Owner,
+        workflow_id: Id,
+        dependency_idx: Id,
+    ) -> Result<Vec<Step>> {
+        self.instance.get_steps(github_owner, workflow_id, dependency_idx).await
     }
 
     fn get_step_by_tx_hash(&self, tx_hash: Hash) -> Option<(Owner, Id, Id, Id)> {
