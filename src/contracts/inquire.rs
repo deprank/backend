@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use anyhow::Result;
+use std::future::Future;
+
 use super::types::{Address, Id};
 
 #[allow(dead_code)]
@@ -41,14 +44,18 @@ pub trait InquireContract {
         inquirer: Address,
         inquiree: Address,
         question: String,
-    ) -> Id;
+    ) -> impl Future<Output = Result<Id>>;
 
     /// Respond to inquiry
-    fn respond_to_inquire(&self, inquire_id: Id, response: String) -> bool;
+    fn respond_to_inquire(
+        &self,
+        inquire_id: Id,
+        response: String,
+    ) -> impl Future<Output = Result<bool>>;
 
     /// Reject inquiry
-    fn reject_inquire(&self, inquire_id: Id) -> bool;
+    fn reject_inquire(&self, inquire_id: Id) -> impl Future<Output = Result<bool>>;
 
     /// Get inquiry details
-    fn get_inquire_details(&self, inquire_id: Id) -> Inquire;
+    fn get_inquire_details(&self, inquire_id: Id) -> impl Future<Output = Result<Inquire>>;
 }

@@ -82,26 +82,26 @@ impl AllocationContract for ContractService {
 }
 
 impl InquireContract for ContractService {
-    fn create_inquire(
+    async fn create_inquire(
         &self,
         workflow_id: Id,
         inquirer: Address,
         inquiree: Address,
         question: String,
-    ) -> Id {
-        self.instance.create_inquire(workflow_id, inquirer, inquiree, question)
+    ) -> Result<Id> {
+        self.instance.create_inquire(workflow_id, inquirer, inquiree, question).await
     }
 
-    fn respond_to_inquire(&self, inquire_id: Id, response: String) -> bool {
-        self.instance.respond_to_inquire(inquire_id, response)
+    async fn respond_to_inquire(&self, inquire_id: Id, response: String) -> Result<bool> {
+        self.instance.respond_to_inquire(inquire_id, response).await
     }
 
-    fn reject_inquire(&self, inquire_id: Id) -> bool {
-        self.instance.reject_inquire(inquire_id)
+    async fn reject_inquire(&self, inquire_id: Id) -> Result<bool> {
+        self.instance.reject_inquire(inquire_id).await
     }
 
-    fn get_inquire_details(&self, inquire_id: Id) -> Inquire {
-        self.instance.get_inquire_details(inquire_id)
+    async fn get_inquire_details(&self, inquire_id: Id) -> Result<Inquire> {
+        self.instance.get_inquire_details(inquire_id).await
     }
 }
 

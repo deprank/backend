@@ -168,7 +168,6 @@ pub struct StarknetConfig {
 /// This struct provides concrete implementations for all contract operations
 /// on the Starknet blockchain, including workflow management, allocations,
 /// inquiries, receipts, and signatures.
-#[allow(dead_code)]
 pub struct StarknetContract {
     /// JSON-RPC client for Starknet network
     provider: JsonRpcClient<HttpTransport>,
@@ -244,7 +243,6 @@ impl StarknetContract {
         }
     }
 
-    #[allow(dead_code)]
     /// Call contract function (read-only operation)
     async fn call(
         &self,
@@ -385,25 +383,73 @@ impl AllocationContract for StarknetContract {
 }
 
 impl InquireContract for StarknetContract {
-    fn create_inquire(
+    async fn create_inquire(
         &self,
-        _workflow_id: Id,
-        _inquirer: Address,
-        _inquiree: Address,
-        _question: String,
-    ) -> Id {
-        todo!()
+        workflow_id: Id,
+        inquirer: Address,
+        inquiree: Address,
+        question: String,
+    ) -> Result<Id> {
+        info!("Starting inquire creation");
+
+        let workflow_id = Felt::from_str(&workflow_id).expect("Invalid workflow id");
+        let inquirer = Felt::from_hex(&inquirer).expect("Invalid inquirer");
+        let inquiree = Felt::from_hex(&inquiree).expect("Invalid inquiree");
+        let question = Felt::from_str(&question).expect("Invalid question");
+
+        let _ = self
+            .execute(
+                &self.inquire_contract_address,
+                &selector!("create_inquire"),
+                vec![workflow_id, inquirer, inquiree, question],
+            )
+            .await?;
+
+        Ok(Id::new())
     }
 
-    fn respond_to_inquire(&self, _inquire_id: Id, _response: String) -> bool {
-        todo!()
+    async fn respond_to_inquire(&self, inquire_id: Id, response: String) -> Result<bool> {
+        info!("Starting respond to inquire");
+
+        let inquire_id = Felt::from_str(&inquire_id).expect("Invalid inquire id");
+        let response = Felt::from_str(&response).expect("Invalid response");
+
+        let _ = self
+            .execute(
+                &self.inquire_contract_address,
+                &selector!("respond_to_inquire"),
+                vec![inquire_id, response],
+            )
+            .await?;
+
+        Ok(true)
     }
 
-    fn reject_inquire(&self, _inquire_id: Id) -> bool {
-        todo!()
+    async fn reject_inquire(&self, inquire_id: Id) -> Result<bool> {
+        info!("Starting reject inquire");
+
+        let inquire_id = Felt::from_str(&inquire_id).expect("Invalid inquire id");
+
+        let _ = self
+            .execute(&self.inquire_contract_address, &selector!("reject_inquire"), vec![inquire_id])
+            .await?;
+
+        Ok(true)
     }
 
-    fn get_inquire_details(&self, _inquire_id: Id) -> Inquire {
+    async fn get_inquire_details(&self, inquire_id: Id) -> Result<Inquire> {
+        info!("Starting get inquire details");
+
+        let inquire_id = Felt::from_str(&inquire_id).expect("Invalid inquire id");
+
+        let _ = self
+            .execute(
+                &self.inquire_contract_address,
+                &selector!("get_inquire_details"),
+                vec![inquire_id],
+            )
+            .await?;
+
         todo!()
     }
 }
@@ -526,7 +572,7 @@ impl SignContract for StarknetContract {
     }
 
     async fn get_sign_by_inquire(&self, inquire_id: Id) -> Result<Id> {
-        info!("Starting get_sign_by_inquire");
+        info!("Starting get sign by inquire");
 
         let inquire_id = Felt::from_str(&inquire_id).expect("Invalid inquire id");
 
