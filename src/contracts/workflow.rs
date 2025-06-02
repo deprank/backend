@@ -189,5 +189,5 @@ pub trait WorkflowContract {
         github_owner: Owner,
         workflow_id: Id,
         new_wallet_address: Address,
-    ) -> bool;
+    ) -> impl Future<Output = Result<bool>>;
 }

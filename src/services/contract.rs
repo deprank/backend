@@ -267,12 +267,12 @@ impl WorkflowContract for ContractService {
         self.instance.unbind_wallet_address(github_owner, workflow_id).await
     }
 
-    fn change_wallet_address(
+    async fn change_wallet_address(
         &self,
         github_owner: Owner,
         workflow_id: Id,
         new_wallet_address: Address,
-    ) -> bool {
-        self.instance.change_wallet_address(github_owner, workflow_id, new_wallet_address)
+    ) -> Result<bool> {
+        self.instance.change_wallet_address(github_owner, workflow_id, new_wallet_address).await
     }
 }
