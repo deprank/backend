@@ -17,6 +17,7 @@ use serde::{Deserialize, Serialize};
 use starknet::{
     accounts::{Account, ExecutionEncoding, SingleOwnerAccount},
     core::types::{BlockId, BlockTag, Call, Felt, FunctionCall, InvokeTransactionResult},
+    macros::selector,
     providers::{
         jsonrpc::{HttpTransport, JsonRpcClient},
         Provider, Url,
@@ -36,10 +37,6 @@ use crate::contracts::{
     workflow::{Dependency, Step, Workflow, WorkflowContract},
     Contract,
 };
-
-// Entrypoint selectors of the function being invoked.
-const SELECTOR_CREATE_WORKFLOW: &str =
-    "0x5911913ce5ab907c3a2d99993ea1a79752241ca82352c7962c5c228d183b6e";
 
 // Struct definitions corresponding to contract structs
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -145,6 +142,22 @@ pub struct StarknetConfig {
     #[clap(long, env = "STARKNET_CHAIN_ID")]
     pub starknet_chain_id: String,
 
+    /// Address of the Allocation contract
+    #[clap(long, env = "ALLOCATION_CONTRACT_ADDRESS")]
+    pub allocation_contract_address: String,
+
+    /// Address of the Inquire contract
+    #[clap(long, env = "INQUIRE_CONTRACT_ADDRESS")]
+    pub inquire_contract_address: String,
+
+    /// Address of the Receipt contract
+    #[clap(long, env = "RECEIPT_CONTRACT_ADDRESS")]
+    pub receipt_contract_address: String,
+
+    /// Address of the Sign contract
+    #[clap(long, env = "SIGN_CONTRACT_ADDRESS")]
+    pub sign_contract_address: String,
+
     /// Address of the Workflow contract
     #[clap(long, env = "WORKFLOW_CONTRACT_ADDRESS")]
     pub workflow_contract_address: String,
@@ -155,12 +168,25 @@ pub struct StarknetConfig {
 /// This struct provides concrete implementations for all contract operations
 /// on the Starknet blockchain, including workflow management, allocations,
 /// inquiries, receipts, and signatures.
+#[allow(dead_code)]
 pub struct StarknetContract {
     /// JSON-RPC client for Starknet network
     provider: JsonRpcClient<HttpTransport>,
 
     /// Starknet account with signing capability
     account: SingleOwnerAccount<JsonRpcClient<HttpTransport>, LocalWallet>,
+
+    /// Address of the Allocation contract
+    allocation_contract_address: Felt,
+
+    /// Address of the Inquire contract
+    inquire_contract_address: Felt,
+
+    /// Address of the Receipt contract
+    receipt_contract_address: Felt,
+
+    /// Address of the Sign contract
+    sign_contract_address: Felt,
 
     /// Address of the Workflow contract
     workflow_contract_address: Felt,
@@ -192,22 +218,43 @@ impl StarknetContract {
         );
 
         // parse contract addresses.
+        let allocation_contract_address = Felt::from_hex(&config.allocation_contract_address)
+            .expect("Invalid allocation contract address");
+
+        let inquire_contract_address = Felt::from_hex(&config.inquire_contract_address)
+            .expect("Invalid inquire contract address");
+
+        let receipt_contract_address = Felt::from_hex(&config.receipt_contract_address)
+            .expect("Invalid receipt contract address");
+
+        let sign_contract_address =
+            Felt::from_hex(&config.sign_contract_address).expect("Invalid sign contract address");
+
         let workflow_contract_address = Felt::from_hex(&config.workflow_contract_address)
             .expect("Invalid workflow contract address");
 
-        Self { provider, account, workflow_contract_address }
+        Self {
+            provider,
+            account,
+            allocation_contract_address,
+            inquire_contract_address,
+            receipt_contract_address,
+            sign_contract_address,
+            workflow_contract_address,
+        }
     }
 
+    #[allow(dead_code)]
     /// Call contract function (read-only operation)
     async fn call(
         &self,
         contract_address: &Felt,
-        selector: Felt,
+        selector: &Felt,
         calldata: Vec<Felt>,
     ) -> Result<Vec<Felt>> {
         let function_call = FunctionCall {
             contract_address: *contract_address,
-            entry_point_selector: selector,
+            entry_point_selector: *selector,
             calldata,
         };
 
@@ -226,7 +273,7 @@ impl StarknetContract {
     async fn execute(
         &self,
         contract_address: &Felt,
-        selector: &str,
+        selector: &Felt,
         calldata: Vec<Felt>,
     ) -> Result<InvokeTransactionResult> {
         debug!(
@@ -234,16 +281,8 @@ impl StarknetContract {
             contract_address, selector, calldata
         );
 
-        let selector = Felt::from_hex(selector).expect("Invalid selector");
-
-        // First try read-only call to validate function
-        if let Err(e) = self.call(contract_address, selector, calldata.clone()).await {
-            info!("Read-only call validation failed, aborting transaction");
-            return Err(e);
-        }
-
         // Create function call object
-        let calls = vec![Call { to: *contract_address, selector, calldata }];
+        let calls = vec![Call { to: *contract_address, selector: *selector, calldata }];
 
         // Execute transaction
         let result = self.account.execute_v3(calls).send().await?;
@@ -367,7 +406,7 @@ impl WorkflowContract for StarknetContract {
         let _ = self
             .execute(
                 &self.workflow_contract_address,
-                SELECTOR_CREATE_WORKFLOW,
+                &selector!("create_workflow"),
                 vec![github_owner, wallet_address],
             )
             .await?;
