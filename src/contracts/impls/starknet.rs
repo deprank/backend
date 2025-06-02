@@ -409,27 +409,81 @@ impl InquireContract for StarknetContract {
 }
 
 impl ReceiptContract for StarknetContract {
-    fn create_receipt(
+    async fn create_receipt(
         &self,
-        _workflow_id: Id,
-        _dependency_url: String,
+        workflow_id: Id,
+        dependency_url: String,
         _metadata: ReceiptMetadata,
-        _metadata_hash: Hash,
-        _metadata_uri: Hash,
-    ) -> Id {
+        metadata_hash: Hash,
+        metadata_uri: Hash,
+    ) -> Result<Id> {
+        info!("Starting receipt creation");
+
+        let workflow_id = Felt::from_str(&workflow_id).expect("Invalid workflow id");
+        let dependency_url = Felt::from_str(&dependency_url).expect("Invalid dependency url");
+        // let metadata = Felt::from_hex(&metadata).expect("Invalid metadata");
+        let metadata_hash = Felt::from_hex(&metadata_hash).expect("Invalid metadata hash");
+        let metadata_uri = Felt::from_str(&metadata_uri).expect("Invalid metadata uri");
+
+        let _ = self
+            .execute(
+                &self.receipt_contract_address,
+                &selector!("create_receipt"),
+                vec![workflow_id, dependency_url, /* metadata, */ metadata_hash, metadata_uri],
+            )
+            .await?;
+
+        Ok(Id::new())
+    }
+
+    async fn get_receipt_details(&self, receipt_id: Id) -> Result<(Receipt, ReceiptMetadata)> {
+        info!("Starting get receipt details");
+
+        let receipt_id = Felt::from_str(&receipt_id).expect("Invalid receipt id");
+
+        let _ = self
+            .call(
+                &self.receipt_contract_address,
+                &selector!("get_receipt_details"),
+                vec![receipt_id],
+            )
+            .await?;
+
         todo!()
     }
 
-    fn get_receipt_details(&self, _receipt_id: Id) -> (Receipt, ReceiptMetadata) {
+    async fn verify_metadata(&self, receipt_id: Id, provided_hash: Hash) -> Result<bool> {
+        info!("Starting verify metadata");
+
+        let receipt_id = Felt::from_str(&receipt_id).expect("Invalid receipt id");
+        let provided_hash = Felt::from_hex(&provided_hash).expect("Invalid provided hash");
+
+        let _ = self
+            .call(
+                &self.receipt_contract_address,
+                &selector!("verify_metadata"),
+                vec![receipt_id, provided_hash],
+            )
+            .await?;
+
         todo!()
     }
 
-    fn verify_metadata(&self, _receipt_id: Id, _provided_hash: Hash) -> bool {
-        todo!()
-    }
+    async fn update_tx_hash(&self, receipt_id: Id, tx_hash: Hash) -> Result<()> {
+        info!("Starting update tx hash");
 
-    fn update_tx_hash(&self, _receipt_id: Id, _tx_hash: Hash) {
-        todo!()
+        let receipt_id = Felt::from_str(&receipt_id).expect("Invalid receipt id");
+        let tx_hash = Felt::from_hex(&tx_hash).expect("Invalid transaction hash");
+
+        let _ = self
+            .execute(
+                &self.receipt_contract_address,
+                &selector!("update_tx_hash"),
+                vec![receipt_id, tx_hash],
+            )
+            .await?;
+
+        Ok(())
     }
 }
 

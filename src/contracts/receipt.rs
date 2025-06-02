@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use anyhow::Result;
+use std::future::Future;
+
 use super::types::{Hash, Id};
 
 #[allow(dead_code)]
@@ -44,14 +47,21 @@ pub trait ReceiptContract {
         metadata: ReceiptMetadata,
         metadata_hash: Hash,
         metadata_uri: Hash,
-    ) -> Id;
+    ) -> impl Future<Output = Result<Id>>;
 
     /// Get receipt details
-    fn get_receipt_details(&self, receipt_id: Id) -> (Receipt, ReceiptMetadata);
+    fn get_receipt_details(
+        &self,
+        receipt_id: Id,
+    ) -> impl Future<Output = Result<(Receipt, ReceiptMetadata)>>;
 
     /// Verify metadata
-    fn verify_metadata(&self, receipt_id: Id, provided_hash: Hash) -> bool;
+    fn verify_metadata(
+        &self,
+        receipt_id: Id,
+        provided_hash: Hash,
+    ) -> impl Future<Output = Result<bool>>;
 
     /// Update transaction hash
-    fn update_tx_hash(&self, receipt_id: Id, tx_hash: Hash);
+    fn update_tx_hash(&self, receipt_id: Id, tx_hash: Hash) -> impl Future<Output = Result<()>>;
 }

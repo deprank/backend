@@ -106,33 +106,29 @@ impl InquireContract for ContractService {
 }
 
 impl ReceiptContract for ContractService {
-    fn create_receipt(
+    async fn create_receipt(
         &self,
         workflow_id: Id,
         dependency_url: String,
         metadata: ReceiptMetadata,
         metadata_hash: Hash,
         metadata_uri: Hash,
-    ) -> Id {
-        self.instance.create_receipt(
-            workflow_id,
-            dependency_url,
-            metadata,
-            metadata_hash,
-            metadata_uri,
-        )
+    ) -> Result<Id> {
+        self.instance
+            .create_receipt(workflow_id, dependency_url, metadata, metadata_hash, metadata_uri)
+            .await
     }
 
-    fn get_receipt_details(&self, receipt_id: Id) -> (Receipt, ReceiptMetadata) {
-        self.instance.get_receipt_details(receipt_id)
+    async fn get_receipt_details(&self, receipt_id: Id) -> Result<(Receipt, ReceiptMetadata)> {
+        self.instance.get_receipt_details(receipt_id).await
     }
 
-    fn verify_metadata(&self, receipt_id: Id, provided_hash: Hash) -> bool {
-        self.instance.verify_metadata(receipt_id, provided_hash)
+    async fn verify_metadata(&self, receipt_id: Id, provided_hash: Hash) -> Result<bool> {
+        self.instance.verify_metadata(receipt_id, provided_hash).await
     }
 
-    fn update_tx_hash(&self, receipt_id: Id, tx_hash: Hash) {
-        self.instance.update_tx_hash(receipt_id, tx_hash);
+    async fn update_tx_hash(&self, receipt_id: Id, tx_hash: Hash) -> Result<()> {
+        self.instance.update_tx_hash(receipt_id, tx_hash).await
     }
 }
 
