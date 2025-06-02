@@ -480,13 +480,27 @@ impl WorkflowContract for StarknetContract {
         Ok(Id::new())
     }
 
-    fn finish_dependency(
+    async fn finish_dependency(
         &self,
-        _github_owner: Owner,
-        _workflow_id: Id,
-        _dependency_idx: Id,
-    ) -> bool {
-        todo!()
+        github_owner: Owner,
+        workflow_id: Id,
+        dependency_idx: Id,
+    ) -> Result<bool> {
+        info!("Starting finish dependency");
+
+        let github_owner = Felt::from_str(&github_owner).expect("Invalid GitHub username");
+        let workflow_id = Felt::from_str(&workflow_id).expect("Invalid workflow id");
+        let dependency_idx = Felt::from_str(&dependency_idx).expect("Invalid dependency index");
+
+        let _ = self
+            .execute(
+                &self.workflow_contract_address,
+                &selector!("finish_dependency"),
+                vec![github_owner, workflow_id, dependency_idx],
+            )
+            .await?;
+
+        Ok(true)
     }
 
     fn finish_workflow(&self, _github_owner: Owner, _workflow_id: Id) -> bool {

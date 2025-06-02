@@ -108,7 +108,12 @@ pub trait WorkflowContract {
     ) -> impl Future<Output = Result<Id>>;
 
     /// Complete dependency
-    fn finish_dependency(&self, github_owner: Owner, workflow_id: Id, dependency_idx: Id) -> bool;
+    fn finish_dependency(
+        &self,
+        github_owner: Owner,
+        workflow_id: Id,
+        dependency_idx: Id,
+    ) -> impl Future<Output = Result<bool>>;
 
     /// Complete workflow
     fn finish_workflow(&self, github_owner: Owner, workflow_id: Id) -> bool;
