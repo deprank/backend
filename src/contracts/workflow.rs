@@ -174,7 +174,7 @@ pub trait WorkflowContract {
         github_owner: Owner,
         workflow_id: Id,
         wallet_address: Address,
-    ) -> bool;
+    ) -> impl Future<Output = Result<bool>>;
 
     /// Unbind multisig wallet address
     fn unbind_wallet_address(&self, github_owner: Owner, workflow_id: Id) -> bool;

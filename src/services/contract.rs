@@ -254,13 +254,13 @@ impl WorkflowContract for ContractService {
         self.instance.get_all_workflows(github_owner).await
     }
 
-    fn bind_wallet_address(
+    async fn bind_wallet_address(
         &self,
         github_owner: Owner,
         workflow_id: Id,
         wallet_address: Address,
-    ) -> bool {
-        self.instance.bind_wallet_address(github_owner, workflow_id, wallet_address)
+    ) -> Result<bool> {
+        self.instance.bind_wallet_address(github_owner, workflow_id, wallet_address).await
     }
 
     fn unbind_wallet_address(&self, github_owner: Owner, workflow_id: Id) -> bool {

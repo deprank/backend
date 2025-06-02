@@ -650,13 +650,27 @@ impl WorkflowContract for StarknetContract {
         todo!()
     }
 
-    fn bind_wallet_address(
+    async fn bind_wallet_address(
         &self,
-        _github_owner: Owner,
-        _workflow_id: Id,
-        _wallet_address: Address,
-    ) -> bool {
-        todo!()
+        github_owner: Owner,
+        workflow_id: Id,
+        wallet_address: Address,
+    ) -> Result<bool> {
+        info!("Starting bind wallet address");
+
+        let github_owner = Felt::from_str(&github_owner).expect("Invalid GitHub username");
+        let workflow_id = Felt::from_str(&workflow_id).expect("Invalid workflow id");
+        let wallet_address = Felt::from_hex(&wallet_address).expect("Invalid wallet address");
+
+        let _ = self
+            .execute(
+                &self.workflow_contract_address,
+                &selector!("bind_wallet_address"),
+                vec![github_owner, workflow_id, wallet_address],
+            )
+            .await?;
+
+        Ok(true)
     }
 
     fn unbind_wallet_address(&self, _github_owner: Owner, _workflow_id: Id) -> bool {
