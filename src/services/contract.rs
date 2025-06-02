@@ -206,8 +206,8 @@ impl WorkflowContract for ContractService {
         self.instance.finish_dependency(github_owner, workflow_id, dependency_idx).await
     }
 
-    fn finish_workflow(&self, github_owner: Owner, workflow_id: Id) -> bool {
-        self.instance.finish_workflow(github_owner, workflow_id)
+    async fn finish_workflow(&self, github_owner: Owner, workflow_id: Id) -> Result<bool> {
+        self.instance.finish_workflow(github_owner, workflow_id).await
     }
 
     fn get_workflow_status(&self, github_owner: Owner, workflow_id: Id) -> Workflow {

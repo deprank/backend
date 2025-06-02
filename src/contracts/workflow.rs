@@ -116,7 +116,11 @@ pub trait WorkflowContract {
     ) -> impl Future<Output = Result<bool>>;
 
     /// Complete workflow
-    fn finish_workflow(&self, github_owner: Owner, workflow_id: Id) -> bool;
+    fn finish_workflow(
+        &self,
+        github_owner: Owner,
+        workflow_id: Id,
+    ) -> impl Future<Output = Result<bool>>;
 
     /// Get workflow status
     fn get_workflow_status(&self, github_owner: Owner, workflow_id: Id) -> Workflow;

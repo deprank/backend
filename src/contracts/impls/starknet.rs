@@ -503,8 +503,21 @@ impl WorkflowContract for StarknetContract {
         Ok(true)
     }
 
-    fn finish_workflow(&self, _github_owner: Owner, _workflow_id: Id) -> bool {
-        todo!()
+    async fn finish_workflow(&self, github_owner: Owner, workflow_id: Id) -> Result<bool> {
+        info!("Starting finish workflow");
+
+        let github_owner = Felt::from_str(&github_owner).expect("Invalid GitHub username");
+        let workflow_id = Felt::from_str(&workflow_id).expect("Invalid workflow id");
+
+        let _ = self
+            .execute(
+                &self.workflow_contract_address,
+                &selector!("finish_workflow"),
+                vec![github_owner, workflow_id],
+            )
+            .await?;
+
+        Ok(true)
     }
 
     fn get_workflow_status(&self, _github_owner: Owner, _workflow_id: Id) -> Workflow {
