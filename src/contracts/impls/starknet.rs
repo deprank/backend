@@ -586,12 +586,26 @@ impl WorkflowContract for StarknetContract {
         todo!()
     }
 
-    fn get_complete_transaction_chain(
+    async fn get_complete_transaction_chain(
         &self,
-        _github_owner: Owner,
-        _workflow_id: Id,
-        _dependency_idx: Id,
-    ) -> Vec<Hash> {
+        github_owner: Owner,
+        workflow_id: Id,
+        dependency_idx: Id,
+    ) -> Result<Vec<Hash>> {
+        info!("Starting get complete transaction chain");
+
+        let github_owner = Felt::from_str(&github_owner).expect("Invalid GitHub username");
+        let workflow_id = Felt::from_str(&workflow_id).expect("Invalid workflow id");
+        let dependency_idx = Felt::from_str(&dependency_idx).expect("Invalid dependency index");
+
+        let _result = self
+            .call(
+                &self.workflow_contract_address,
+                &selector!("get_complete_transaction_chain"),
+                vec![github_owner, workflow_id, dependency_idx],
+            )
+            .await?;
+
         todo!()
     }
 

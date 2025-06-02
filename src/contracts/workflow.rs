@@ -154,7 +154,7 @@ pub trait WorkflowContract {
         github_owner: Owner,
         workflow_id: Id,
         dependency_idx: Id,
-    ) -> Vec<Hash>;
+    ) -> impl Future<Output = Result<Vec<Hash>>>;
 
     /// Get user workflow count
     fn get_workflow_count(&self, github_owner: Owner) -> Number;

@@ -235,13 +235,15 @@ impl WorkflowContract for ContractService {
         self.instance.get_step_by_tx_hash(tx_hash)
     }
 
-    fn get_complete_transaction_chain(
+    async fn get_complete_transaction_chain(
         &self,
         github_owner: Owner,
         workflow_id: Id,
         dependency_idx: Id,
-    ) -> Vec<Hash> {
-        self.instance.get_complete_transaction_chain(github_owner, workflow_id, dependency_idx)
+    ) -> Result<Vec<Hash>> {
+        self.instance
+            .get_complete_transaction_chain(github_owner, workflow_id, dependency_idx)
+            .await
     }
 
     fn get_workflow_count(&self, github_owner: Owner) -> Number {
