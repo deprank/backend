@@ -231,8 +231,8 @@ impl WorkflowContract for ContractService {
         self.instance.get_steps(github_owner, workflow_id, dependency_idx).await
     }
 
-    fn get_step_by_tx_hash(&self, tx_hash: Hash) -> Option<(Owner, Id, Id, Id)> {
-        self.instance.get_step_by_tx_hash(tx_hash)
+    async fn get_step_by_tx_hash(&self, tx_hash: Hash) -> Result<Option<(Owner, Id, Id, Id)>> {
+        self.instance.get_step_by_tx_hash(tx_hash).await
     }
 
     async fn get_complete_transaction_chain(

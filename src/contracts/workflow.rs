@@ -146,7 +146,10 @@ pub trait WorkflowContract {
 
     /// Get step by transaction hash
     /// (github_owner, workflow_id, dependency_index, step_index)
-    fn get_step_by_tx_hash(&self, tx_hash: Hash) -> Option<(Owner, Id, Id, Id)>;
+    fn get_step_by_tx_hash(
+        &self,
+        tx_hash: Hash,
+    ) -> impl Future<Output = Result<Option<(Owner, Id, Id, Id)>>>;
 
     /// Get complete transaction chain
     fn get_complete_transaction_chain(

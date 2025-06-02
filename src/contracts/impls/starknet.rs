@@ -582,7 +582,15 @@ impl WorkflowContract for StarknetContract {
         todo!()
     }
 
-    fn get_step_by_tx_hash(&self, _tx_hash: Hash) -> Option<(Owner, Id, Id, Id)> {
+    async fn get_step_by_tx_hash(&self, tx_hash: Hash) -> Result<Option<(Owner, Id, Id, Id)>> {
+        info!("Starting get step by tx hash");
+
+        let tx_hash = Felt::from_hex(&tx_hash).expect("Invalid transaction hash");
+
+        let _result = self
+            .call(&self.workflow_contract_address, &selector!("get_step_by_tx_hash"), vec![tx_hash])
+            .await?;
+
         todo!()
     }
 
