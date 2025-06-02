@@ -21,7 +21,7 @@ use crate::{
         receipt::{Receipt, ReceiptContract, ReceiptMetadata},
         sign::{Sign, SignContract},
         types::*,
-        workflow::{Dependency, Step, Workflow, WorkflowContract},
+        workflow::{Dependency, Step, StepType, Workflow, WorkflowContract},
         Contract,
     },
 };
@@ -176,23 +176,25 @@ impl WorkflowContract for ContractService {
             .await
     }
 
-    fn add_step(
+    async fn add_step(
         &self,
         github_owner: Owner,
         workflow_id: Id,
         dependency_index: Id,
-        step_type: String,
+        step_type: StepType,
         tx_hash: Hash,
         related_entity_id: Id,
-    ) -> Id {
-        self.instance.add_step(
-            github_owner,
-            workflow_id,
-            dependency_index,
-            step_type,
-            tx_hash,
-            related_entity_id,
-        )
+    ) -> Result<Id> {
+        self.instance
+            .add_step(
+                github_owner,
+                workflow_id,
+                dependency_index,
+                step_type,
+                tx_hash,
+                related_entity_id,
+            )
+            .await
     }
 
     fn finish_dependency(&self, github_owner: Owner, workflow_id: Id, dependency_idx: Id) -> bool {

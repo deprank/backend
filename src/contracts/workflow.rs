@@ -59,6 +59,17 @@ pub enum StepType {
     Allocation,
 }
 
+impl std::fmt::Display for StepType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            StepType::Receipt => write!(f, "1"),
+            StepType::Inquire => write!(f, "2"),
+            StepType::Sign => write!(f, "3"),
+            StepType::Allocation => write!(f, "4"),
+        }
+    }
+}
+
 pub enum Status {
     Created,
     InProgress,
@@ -90,11 +101,11 @@ pub trait WorkflowContract {
         &self,
         github_owner: Owner,
         workflow_id: Id,
-        dependency_index: Id,
-        step_type: String,
+        dependency_idx: Id,
+        step_type: StepType,
         tx_hash: Hash,
         related_entity_id: Id,
-    ) -> Id;
+    ) -> impl Future<Output = Result<Id>>;
 
     /// Complete dependency
     fn finish_dependency(&self, github_owner: Owner, workflow_id: Id, dependency_idx: Id) -> bool;

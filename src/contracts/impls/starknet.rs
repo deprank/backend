@@ -34,7 +34,7 @@ use crate::contracts::{
     receipt::{Receipt, ReceiptContract, ReceiptMetadata},
     sign::{Sign, SignContract},
     types::*,
-    workflow::{Dependency, Step, Workflow, WorkflowContract},
+    workflow::{Dependency, Step, StepType, Workflow, WorkflowContract},
     Contract,
 };
 
@@ -443,16 +443,41 @@ impl WorkflowContract for StarknetContract {
         Ok(Id::new())
     }
 
-    fn add_step(
+    async fn add_step(
         &self,
-        _github_owner: Owner,
-        _workflow_id: Id,
-        _dependency_index: Id,
-        _step_type: String,
-        _tx_hash: Hash,
-        _related_entity_id: Id,
-    ) -> Id {
-        todo!()
+        github_owner: Owner,
+        workflow_id: Id,
+        dependency_idx: Id,
+        step_type: StepType,
+        tx_hash: Hash,
+        related_entity_id: Id,
+    ) -> Result<Id> {
+        info!("Starting add step");
+
+        let github_owner = Felt::from_str(&github_owner).expect("Invalid GitHub username");
+        let workflow_id = Felt::from_str(&workflow_id).expect("Invalid workflow id");
+        let dependency_idx = Felt::from_str(&dependency_idx).expect("Invalid dependency index");
+        let step_type = Felt::from_str(&step_type.to_string()).expect("Invalid step type");
+        let tx_hash = Felt::from_str(&tx_hash).expect("Invalid transaction hash");
+        let related_entity_id =
+            Felt::from_str(&related_entity_id).expect("Invalid related entity id");
+
+        let _ = self
+            .execute(
+                &self.workflow_contract_address,
+                &selector!("add_step"),
+                vec![
+                    github_owner,
+                    workflow_id,
+                    dependency_idx,
+                    step_type,
+                    tx_hash,
+                    related_entity_id,
+                ],
+            )
+            .await?;
+
+        Ok(Id::new())
     }
 
     fn finish_dependency(
