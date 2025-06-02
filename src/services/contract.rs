@@ -51,27 +51,33 @@ impl Contract for ContractService {
 }
 
 impl AllocationContract for ContractService {
-    fn create_allocation(
+    async fn create_allocation(
         &self,
         workflow_id: Id,
         sign_id: Id,
         recipient: Address,
         amount: Number,
         token_address: Address,
-    ) -> Id {
-        self.instance.create_allocation(workflow_id, sign_id, recipient, amount, token_address)
+    ) -> Result<Id> {
+        self.instance
+            .create_allocation(workflow_id, sign_id, recipient, amount, token_address)
+            .await
     }
 
-    fn update_allocation_status(&self, allocation_id: Id, status: AllocationStatus) -> bool {
-        self.instance.update_allocation_status(allocation_id, status)
+    async fn update_allocation_status(
+        &self,
+        allocation_id: Id,
+        status: AllocationStatus,
+    ) -> Result<bool> {
+        self.instance.update_allocation_status(allocation_id, status).await
     }
 
-    fn get_allocation_details(&self, allocation_id: Id) -> Allocation {
-        self.instance.get_allocation_details(allocation_id)
+    async fn get_allocation_details(&self, allocation_id: Id) -> Result<Allocation> {
+        self.instance.get_allocation_details(allocation_id).await
     }
 
-    fn get_allocation_by_sign(&self, sign_id: Id) -> Id {
-        self.instance.get_allocation_by_sign(sign_id)
+    async fn get_allocation_by_sign(&self, sign_id: Id) -> Result<Id> {
+        self.instance.get_allocation_by_sign(sign_id).await
     }
 }
 

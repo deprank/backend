@@ -303,26 +303,83 @@ impl Contract for StarknetContract {
 }
 
 impl AllocationContract for StarknetContract {
-    fn create_allocation(
+    async fn create_allocation(
         &self,
-        _workflow_id: Id,
-        _sign_id: Id,
-        _recipient: Address,
-        _amount: Number,
-        _token_address: Address,
-    ) -> Id {
+        workflow_id: Id,
+        sign_id: Id,
+        recipient: Address,
+        amount: Number,
+        token_address: Address,
+    ) -> Result<Id> {
+        info!("Starting allocation creation");
+
+        let workflow_id = Felt::from_str(&workflow_id).expect("Invalid workflow id");
+        let sign_id = Felt::from_str(&sign_id).expect("Invalid sign id");
+        let recipient = Felt::from_hex(&recipient).expect("Invalid recipient");
+        let amount = Felt::from_str(&amount).expect("Invalid amount");
+        let token_address = Felt::from_hex(&token_address).expect("Invalid token_address");
+
+        let _ = self
+            .execute(
+                &self.allocation_contract_address,
+                &selector!("create_allocation"),
+                vec![workflow_id, sign_id, recipient, amount, token_address],
+            )
+            .await?;
+
+        Ok(Id::new())
+    }
+
+    async fn update_allocation_status(
+        &self,
+        allocation_id: Id,
+        status: AllocationStatus,
+    ) -> Result<bool> {
+        info!("Starting update allocation status");
+
+        let allocation_id = Felt::from_str(&allocation_id).expect("Invalid allocation id");
+        let status = Felt::from_str(&status.to_string()).expect("Invalid status");
+
+        let _ = self
+            .execute(
+                &self.allocation_contract_address,
+                &selector!("update_allocation_status"),
+                vec![allocation_id, status],
+            )
+            .await?;
+
+        Ok(true)
+    }
+
+    async fn get_allocation_details(&self, allocation_id: Id) -> Result<Allocation> {
+        info!("Starting update allocation status");
+
+        let allocation_id = Felt::from_str(&allocation_id).expect("Invalid allocation id");
+
+        let _ = self
+            .call(
+                &self.allocation_contract_address,
+                &selector!("get_allocation_details"),
+                vec![allocation_id],
+            )
+            .await?;
+
         todo!()
     }
 
-    fn update_allocation_status(&self, _allocation_id: Id, _status: AllocationStatus) -> bool {
-        todo!()
-    }
+    async fn get_allocation_by_sign(&self, sign_id: Id) -> Result<Id> {
+        info!("Starting get allocation by sign");
 
-    fn get_allocation_details(&self, _allocation_id: Id) -> Allocation {
-        todo!()
-    }
+        let sign_id = Felt::from_str(&sign_id).expect("Invalid sign id");
 
-    fn get_allocation_by_sign(&self, _sign_id: Id) -> Id {
+        let _ = self
+            .call(
+                &self.allocation_contract_address,
+                &selector!("get_allocation_by_sign"),
+                vec![sign_id],
+            )
+            .await?;
+
         todo!()
     }
 }

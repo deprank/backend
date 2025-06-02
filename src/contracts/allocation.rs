@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use anyhow::Result;
+use std::future::Future;
+
 use super::types::{Address, Hash, Id, Number};
 
 #[allow(dead_code)]
@@ -32,6 +35,16 @@ pub enum Status {
     Failed,
 }
 
+impl std::fmt::Display for Status {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Pending => write!(f, "0"),
+            Self::Executed => write!(f, "1"),
+            Self::Failed => write!(f, "2"),
+        }
+    }
+}
+
 /// Allocation Contract Interface
 pub trait AllocationContract {
     /// Create allocation record
@@ -42,14 +55,19 @@ pub trait AllocationContract {
         recipient: Address,
         amount: Number,
         token_address: Address,
-    ) -> Id;
+    ) -> impl Future<Output = Result<Id>>;
 
     /// Update allocation status
-    fn update_allocation_status(&self, allocation_id: Id, status: Status) -> bool;
+    fn update_allocation_status(
+        &self,
+        allocation_id: Id,
+        status: Status,
+    ) -> impl Future<Output = Result<bool>>;
 
     /// Get allocation details
-    fn get_allocation_details(&self, allocation_id: Id) -> Allocation;
+    fn get_allocation_details(&self, allocation_id: Id)
+        -> impl Future<Output = Result<Allocation>>;
 
     /// Get allocation ID by sign ID
-    fn get_allocation_by_sign(&self, sign_id: Id) -> Id;
+    fn get_allocation_by_sign(&self, sign_id: Id) -> impl Future<Output = Result<Id>>;
 }
