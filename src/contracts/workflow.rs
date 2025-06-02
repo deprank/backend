@@ -130,7 +130,11 @@ pub trait WorkflowContract {
     ) -> impl Future<Output = Result<Workflow>>;
 
     /// Get workflow dependencies
-    fn get_dependencies(&self, github_owner: Owner, workflow_id: Id) -> Vec<Dependency>;
+    fn get_dependencies(
+        &self,
+        github_owner: Owner,
+        workflow_id: Id,
+    ) -> impl Future<Output = Result<Vec<Dependency>>>;
 
     /// Get dependency steps
     fn get_steps(&self, github_owner: Owner, workflow_id: Id, dependency_idx: Id) -> Vec<Step>;

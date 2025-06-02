@@ -214,8 +214,12 @@ impl WorkflowContract for ContractService {
         self.instance.get_workflow_status(github_owner, workflow_id).await
     }
 
-    fn get_dependencies(&self, github_owner: Owner, workflow_id: Id) -> Vec<Dependency> {
-        self.instance.get_dependencies(github_owner, workflow_id)
+    async fn get_dependencies(
+        &self,
+        github_owner: Owner,
+        workflow_id: Id,
+    ) -> Result<Vec<Dependency>> {
+        self.instance.get_dependencies(github_owner, workflow_id).await
     }
 
     fn get_steps(&self, github_owner: Owner, workflow_id: Id, dependency_idx: Id) -> Vec<Step> {

@@ -538,7 +538,24 @@ impl WorkflowContract for StarknetContract {
         todo!()
     }
 
-    fn get_dependencies(&self, _github_owner: Owner, _workflow_id: Id) -> Vec<Dependency> {
+    async fn get_dependencies(
+        &self,
+        github_owner: Owner,
+        workflow_id: Id,
+    ) -> Result<Vec<Dependency>> {
+        info!("Starting get dependencies");
+
+        let github_owner = Felt::from_str(&github_owner).expect("Invalid GitHub username");
+        let workflow_id = Felt::from_str(&workflow_id).expect("Invalid workflow id");
+
+        let _result = self
+            .call(
+                &self.workflow_contract_address,
+                &selector!("get_dependencies"),
+                vec![github_owner, workflow_id],
+            )
+            .await?;
+
         todo!()
     }
 
