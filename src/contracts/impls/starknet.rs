@@ -414,16 +414,33 @@ impl WorkflowContract for StarknetContract {
         Ok(Id::new())
     }
 
-    fn create_dependency(
+    async fn create_dependency(
         &self,
-        _github_owner: Owner,
-        _workflow_id: Id,
-        _name: String,
-        _repository_url: String,
-        _license: String,
-        _metadata_json: String,
-    ) -> Id {
-        todo!()
+        github_owner: Owner,
+        workflow_id: Id,
+        name: String,
+        repository_url: String,
+        license: String,
+        metadata_json: String,
+    ) -> Result<Id> {
+        info!("Starting dependency creation");
+
+        let github_owner = Felt::from_str(&github_owner).expect("Invalid GitHub username");
+        let workflow_id = Felt::from_str(&workflow_id).expect("Invalid workflow id");
+        let name = Felt::from_str(&name).expect("Invalid name");
+        let repository_url = Felt::from_str(&repository_url).expect("Invalid repository url");
+        let license = Felt::from_str(&license).expect("Invalid license");
+        let metadata_json = Felt::from_str(&metadata_json).expect("Invalid metadata json");
+
+        let _ = self
+            .execute(
+                &self.workflow_contract_address,
+                &selector!("create_dependency"),
+                vec![github_owner, workflow_id, name, repository_url, license, metadata_json],
+            )
+            .await?;
+
+        Ok(Id::new())
     }
 
     fn add_step(

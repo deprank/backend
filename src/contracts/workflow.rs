@@ -83,7 +83,7 @@ pub trait WorkflowContract {
         repository_url: String,
         license: String,
         metadata_json: String,
-    ) -> Id;
+    ) -> impl Future<Output = Result<Id>>;
 
     /// Add step
     fn add_step(

@@ -155,7 +155,7 @@ impl WorkflowContract for ContractService {
         self.instance.create_workflow(github_owner, wallet_address).await
     }
 
-    fn create_dependency(
+    async fn create_dependency(
         &self,
         github_owner: Owner,
         workflow_id: Id,
@@ -163,15 +163,17 @@ impl WorkflowContract for ContractService {
         repository_url: String,
         license: String,
         metadata_json: String,
-    ) -> Id {
-        self.instance.create_dependency(
-            github_owner,
-            workflow_id,
-            name,
-            repository_url,
-            license,
-            metadata_json,
-        )
+    ) -> Result<Id> {
+        self.instance
+            .create_dependency(
+                github_owner,
+                workflow_id,
+                name,
+                repository_url,
+                license,
+                metadata_json,
+            )
+            .await
     }
 
     fn add_step(
