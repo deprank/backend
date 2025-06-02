@@ -137,22 +137,22 @@ impl ReceiptContract for ContractService {
 }
 
 impl SignContract for ContractService {
-    fn create_sign(
+    async fn create_sign(
         &self,
         workflow_id: Id,
         inquire_id: Id,
         signer: Address,
         signature_hash: Hash,
-    ) -> Id {
-        self.instance.create_sign(workflow_id, inquire_id, signer, signature_hash)
+    ) -> Result<Id> {
+        self.instance.create_sign(workflow_id, inquire_id, signer, signature_hash).await
     }
 
-    fn get_sign_details(&self, sign_id: Id) -> Sign {
-        self.instance.get_sign_details(sign_id)
+    async fn get_sign_details(&self, sign_id: Id) -> Result<Sign> {
+        self.instance.get_sign_details(sign_id).await
     }
 
-    fn get_sign_by_inquire(&self, inquire_id: Id) -> Id {
-        self.instance.get_sign_by_inquire(inquire_id)
+    async fn get_sign_by_inquire(&self, inquire_id: Id) -> Result<Id> {
+        self.instance.get_sign_by_inquire(inquire_id).await
     }
 }
 

@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use anyhow::Result;
+use std::future::Future;
+
 use super::types::{Address, Hash, Id};
 
 #[allow(dead_code)]
@@ -33,11 +36,11 @@ pub trait SignContract {
         inquire_id: Id,
         signer: Address,
         signature_hash: Hash,
-    ) -> Id;
+    ) -> impl Future<Output = Result<Id>>;
 
     /// Get signature details
-    fn get_sign_details(&self, sign_id: Id) -> Sign;
+    fn get_sign_details(&self, sign_id: Id) -> impl Future<Output = Result<Sign>>;
 
     /// Get signature ID by inquiry ID
-    fn get_sign_by_inquire(&self, inquire_id: Id) -> Id;
+    fn get_sign_by_inquire(&self, inquire_id: Id) -> impl Future<Output = Result<Id>>;
 }

@@ -434,21 +434,52 @@ impl ReceiptContract for StarknetContract {
 }
 
 impl SignContract for StarknetContract {
-    fn create_sign(
+    async fn create_sign(
         &self,
-        _workflow_id: Id,
-        _inquire_id: Id,
-        _signer: Address,
-        _signature_hash: Hash,
-    ) -> Id {
+        workflow_id: Id,
+        inquire_id: Id,
+        signer: Address,
+        signature_hash: Hash,
+    ) -> Result<Id> {
+        info!("Starting sign creation");
+
+        let workflow_id = Felt::from_str(&workflow_id).expect("Invalid workflow id");
+        let inquire_id = Felt::from_str(&inquire_id).expect("Invalid inquire id");
+        let signer = Felt::from_hex(&signer).expect("Invalid signer");
+        let signature_hash = Felt::from_hex(&signature_hash).expect("Invalid signature hash");
+
+        let _ = self
+            .execute(
+                &self.sign_contract_address,
+                &selector!("create_sign"),
+                vec![workflow_id, inquire_id, signer, signature_hash],
+            )
+            .await?;
+
+        Ok(Id::new())
+    }
+
+    async fn get_sign_details(&self, sign_id: Id) -> Result<Sign> {
+        info!("Starting get sign details");
+
+        let sign_id = Felt::from_str(&sign_id).expect("Invalid sign id");
+
+        let _ = self
+            .call(&self.sign_contract_address, &selector!("get_sign_details"), vec![sign_id])
+            .await?;
+
         todo!()
     }
 
-    fn get_sign_details(&self, _sign_id: Id) -> Sign {
-        todo!()
-    }
+    async fn get_sign_by_inquire(&self, inquire_id: Id) -> Result<Id> {
+        info!("Starting get_sign_by_inquire");
 
-    fn get_sign_by_inquire(&self, _inquire_id: Id) -> Id {
+        let inquire_id = Felt::from_str(&inquire_id).expect("Invalid inquire id");
+
+        let _ = self
+            .call(&self.sign_contract_address, &selector!("get_sign_by_inquire"), vec![inquire_id])
+            .await?;
+
         todo!()
     }
 }
