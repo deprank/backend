@@ -123,7 +123,11 @@ pub trait WorkflowContract {
     ) -> impl Future<Output = Result<bool>>;
 
     /// Get workflow status
-    fn get_workflow_status(&self, github_owner: Owner, workflow_id: Id) -> Workflow;
+    fn get_workflow_status(
+        &self,
+        github_owner: Owner,
+        workflow_id: Id,
+    ) -> impl Future<Output = Result<Workflow>>;
 
     /// Get workflow dependencies
     fn get_dependencies(&self, github_owner: Owner, workflow_id: Id) -> Vec<Dependency>;

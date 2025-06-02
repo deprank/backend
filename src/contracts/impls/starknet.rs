@@ -520,7 +520,21 @@ impl WorkflowContract for StarknetContract {
         Ok(true)
     }
 
-    fn get_workflow_status(&self, _github_owner: Owner, _workflow_id: Id) -> Workflow {
+    async fn get_workflow_status(&self, github_owner: Owner, workflow_id: Id) -> Result<Workflow> {
+        info!("Starting get workflow status");
+
+        let github_owner = Felt::from_str(&github_owner).expect("Invalid GitHub username");
+        let workflow_id = Felt::from_str(&workflow_id).expect("Invalid workflow id");
+
+        let result = self
+            .call(
+                &self.workflow_contract_address,
+                &selector!("get_workflow_status"),
+                vec![github_owner, workflow_id],
+            )
+            .await?;
+
+        let _workflow = result.first().ok_or(anyhow!("Not found workflow"))?;
         todo!()
     }
 

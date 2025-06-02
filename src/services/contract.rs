@@ -210,8 +210,8 @@ impl WorkflowContract for ContractService {
         self.instance.finish_workflow(github_owner, workflow_id).await
     }
 
-    fn get_workflow_status(&self, github_owner: Owner, workflow_id: Id) -> Workflow {
-        self.instance.get_workflow_status(github_owner, workflow_id)
+    async fn get_workflow_status(&self, github_owner: Owner, workflow_id: Id) -> Result<Workflow> {
+        self.instance.get_workflow_status(github_owner, workflow_id).await
     }
 
     fn get_dependencies(&self, github_owner: Owner, workflow_id: Id) -> Vec<Dependency> {
