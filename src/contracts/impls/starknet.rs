@@ -617,8 +617,21 @@ impl WorkflowContract for StarknetContract {
         todo!()
     }
 
-    fn get_workflow_count(&self, _github_owner: Owner) -> Number {
-        todo!()
+    async fn get_workflow_count(&self, github_owner: Owner) -> Result<Number> {
+        info!("Starting get workflow count");
+
+        let github_owner = Felt::from_str(&github_owner).expect("Invalid GitHub username");
+
+        let result = self
+            .call(
+                &self.workflow_contract_address,
+                &selector!("get_workflow_count"),
+                vec![github_owner],
+            )
+            .await?;
+
+        let count = result.first().unwrap_or(&Felt::ZERO);
+        Ok(count.to_string())
     }
 
     fn get_all_workflows(&self, _github_owner: Owner) -> Vec<(Number, Workflow)> {

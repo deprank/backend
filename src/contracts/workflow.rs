@@ -160,7 +160,7 @@ pub trait WorkflowContract {
     ) -> impl Future<Output = Result<Vec<Hash>>>;
 
     /// Get user workflow count
-    fn get_workflow_count(&self, github_owner: Owner) -> Number;
+    fn get_workflow_count(&self, github_owner: Owner) -> impl Future<Output = Result<Number>>;
 
     /// Get all user workflows
     fn get_all_workflows(&self, github_owner: Owner) -> Vec<(Number, Workflow)>;

@@ -246,8 +246,8 @@ impl WorkflowContract for ContractService {
             .await
     }
 
-    fn get_workflow_count(&self, github_owner: Owner) -> Number {
-        self.instance.get_workflow_count(github_owner)
+    async fn get_workflow_count(&self, github_owner: Owner) -> Result<Number> {
+        self.instance.get_workflow_count(github_owner).await
     }
 
     fn get_all_workflows(&self, github_owner: Owner) -> Vec<(Number, Workflow)> {
