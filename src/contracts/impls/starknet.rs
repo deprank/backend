@@ -199,10 +199,9 @@ impl StarknetContract {
         ));
 
         // Create account object.
-        let key_pair = SigningKey::from_secret_scalar(
+        let signer = LocalWallet::from_signing_key(SigningKey::from_secret_scalar(
             Felt::from_hex(&config.starknet_private_key).expect("Invalid Starknet private key"),
-        );
-        let signer = LocalWallet::from_signing_key(key_pair);
+        ));
         let account_address = Felt::from_hex(&config.starknet_account_address)
             .expect("Invalid Starknet account address");
         let chain_id =
