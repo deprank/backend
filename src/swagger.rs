@@ -31,6 +31,9 @@ use crate::{handlers, requests, responses};
         handlers::workflow::get,
         handlers::workflow::create,
         handlers::workflow::delete,
+
+        handlers::contribution::list,
+        handlers::contribution::get,
     ),
     components(
         schemas(

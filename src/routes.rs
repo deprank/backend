@@ -21,7 +21,7 @@ use axum::{
 
 use crate::{
     context::Context,
-    handlers::{contributor, dependency, project, workflow},
+    handlers::{contribution, contributor, dependency, project, workflow},
 };
 
 pub fn build() -> Router<Arc<Context>> {
@@ -39,4 +39,10 @@ pub fn build() -> Router<Arc<Context>> {
         .route("/v1/workflows", post(workflow::create))
         .route("/v1/workflows/{id}", delete(workflow::delete))
         .route("/v1/workflows/{id}", get(workflow::get))
+        //
+        .route("/v1/workflows/{id}/contributions", get(contribution::list))
+        .route(
+            "/v1/workflows/{workflow_id}/contributions/{contribution_id}",
+            get(contribution::get),
+        )
 }
