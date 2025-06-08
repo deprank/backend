@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub mod contributor;
 pub mod dependency;
 pub mod project;
 pub mod workflow;
