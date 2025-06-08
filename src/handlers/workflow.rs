@@ -80,7 +80,7 @@ pub async fn delete(
     responses(
         (status = 204, description = "Workflow started successfully"),
         (status = 404, description = "Workflow not found"),
-        (status = 500, description = "Failed to start workflow")
+        (status = 500, description = "Failed to get workflow")
     ),
     tag = "Workflows"
 )]
