@@ -36,7 +36,7 @@ use crate::{context::Context, errors::Result};
         (status = 404, description = "Workflow not found"),
         (status = 500, description = "Failed to get workflow")
     ),
-    tag = "Workflows"
+    tag = "Allocation"
 )]
 pub async fn list(
     State(_ctx): State<Arc<Context>>,
@@ -48,9 +48,9 @@ pub async fn list(
 /// Get the allocation detail of the workflow
 #[utoipa::path(
     operation_id = "get-allocation-detail",
-    get, path = "/v1/workflows/{workflow_id}/allocations/{allocation_id}",
+    get, path = "/v1/workflows/{id}/allocations/{allocation_id}",
     params(
-        ("workflow_id" = Uuid, description = "The id of workflow"),
+        ("id" = Uuid, description = "The id of workflow"),
         ("allocation_id" = Uuid, description = "The id of allocation"),
     ),
     responses(
@@ -58,11 +58,11 @@ pub async fn list(
         (status = 404, description = "Workflow not found"),
         (status = 500, description = "Failed to get workflow")
     ),
-    tag = "Workflows"
+    tag = "Allocation"
 )]
 pub async fn get(
     State(_ctx): State<Arc<Context>>,
-    Path((_workflow_id, _allocation_id)): Path<(Uuid, Uuid)>,
+    Path((_id, _allocation_id)): Path<(Uuid, Uuid)>,
 ) -> Result<impl IntoResponse> {
     Ok(Vec::new())
 }

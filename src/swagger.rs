@@ -20,43 +20,48 @@ use crate::{handlers, requests, responses};
 #[derive(OpenApi)]
 #[openapi(
     paths(
-        handlers::project::get,
+        handlers::airdrop::get,
+        handlers::airdrop::submit,
 
-        handlers::dependency::list,
-        handlers::dependency::get,
-
-        handlers::contributor::list,
-        handlers::contributor::get,
-
-        handlers::workflow::get,
-        handlers::workflow::create,
-        handlers::workflow::delete,
-
-        handlers::contribution::list,
-        handlers::contribution::get,
-
-        handlers::allocation::list,
         handlers::allocation::get,
+        handlers::allocation::list,
+
+        handlers::contribution::get,
+        handlers::contribution::list,
+
+        handlers::contributor::get,
+        handlers::contributor::list,
+
+        handlers::dependency::get,
+        handlers::dependency::list,
+
+        handlers::project::get,
 
         handlers::wallet::bind,
         handlers::wallet::unbind,
 
-        handlers::airdrop::get,
-        handlers::airdrop::submit,
+        handlers::workflow::create,
+        handlers::workflow::delete,
+        handlers::workflow::get,
     ),
     components(
         schemas(
-            responses::project::ProjectResponse,
-
             requests::wallet::WalletAddressRequest,
             requests::workflow::CreateWorkflowRequest,
+
+            responses::project::ProjectResponse,
             responses::workflow::WorkflowResponse,
         )
     ),
     tags(
-        (name = "Projects", description = "The Project Service Handlers"),
-        (name = "Workflows", description = "The Workflow Service Handlers"),
         (name = "Airdrop", description = "The Airdrop Service Handlers"),
+        (name = "Allocation", description = "The Allocation Service Handlers"),
+        (name = "Contribution", description = "The Contribution Service Handlers"),
+        (name = "Contributor", description = "The Contributor Service Handlers"),
+        (name = "Dependency", description = "The Dependency Service Handlers"),
+        (name = "Project", description = "The Project Service Handlers"),
+        (name = "Wallet", description = "The Wallet address Service Handlers"),
+        (name = "Workflow", description = "The Workflow Service Handlers"),
     ),
 )]
 struct ApiDoc;

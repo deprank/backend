@@ -43,7 +43,7 @@ use crate::{context::Context, errors::Result, requests::wallet::WalletAddressReq
         (status = 404, description = "Workflow not found"),
         (status = 500, description = "Failed to bind wallet address")
     ),
-    tag = "Workflows"
+    tag = "Wallet"
 )]
 pub async fn bind(
     State(_ctx): State<Arc<Context>>,
@@ -65,7 +65,7 @@ pub async fn bind(
         (status = 404, description = "Workflow not found"),
         (status = 500, description = "Failed to unbind wallet address")
     ),
-    tag = "Workflows"
+    tag = "Wallet"
 )]
 pub async fn unbind(
     State(_ctx): State<Arc<Context>>,

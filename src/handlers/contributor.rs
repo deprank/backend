@@ -36,7 +36,7 @@ use crate::{context::Context, errors::Result};
         (status = 404, description = "Project not found"),
         (status = 500, description = "Failed to get project")
     ),
-    tag = "Projects"
+    tag = "Contributor"
 )]
 pub async fn list(
     State(_ctx): State<Arc<Context>>,
@@ -59,7 +59,7 @@ pub async fn list(
         (status = 404, description = "Project not found"),
         (status = 500, description = "Failed to get project")
     ),
-    tag = "Projects"
+    tag = "Contributor"
 )]
 pub async fn get(
     State(_ctx): State<Arc<Context>>,

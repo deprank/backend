@@ -41,7 +41,7 @@ use crate::{
         (status = 404, description = "Project not found"),
         (status = 500, description = "Failed to get project")
     ),
-    tag = "Projects"
+    tag = "Project"
 )]
 pub async fn get(
     State(ctx): State<Arc<Context>>,

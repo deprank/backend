@@ -19,42 +19,32 @@ use axum::{
     Router,
 };
 
-use crate::{
-    context::Context,
-    handlers::{
-        airdrop, allocation, contribution, contributor, dependency, project, wallet, workflow,
-    },
-};
+use crate::{context::Context, handlers::*};
 
 pub fn build() -> Router<Arc<Context>> {
     Router::new()
-        // projects
-        .route("/v1/projects/{owner}/{name}", get(project::get))
+        .route("/v1/airdrops/{id}", get(airdrop::get))
+        .route("/v1/airdrops/{id}", post(airdrop::submit))
         //
-        .route("/v1/projects/{owner}/{name}/dependencies", get(dependency::list))
-        .route("/v1/projects/{owner}/{name}/dependencies/{dep}", get(dependency::get))
+        .route("/v1/projects/{owner}/{name}", get(project::get))
         //
         .route("/v1/projects/{owner}/{name}/contributors", get(contributor::list))
         .route("/v1/projects/{owner}/{name}/contributors/{username}", get(contributor::get))
         //
-        // workflows
+        .route("/v1/projects/{owner}/{name}/dependencies", get(dependency::list))
+        .route("/v1/projects/{owner}/{name}/dependencies/{dep}", get(dependency::get))
+        //
         .route("/v1/workflows", post(workflow::create))
         .route("/v1/workflows/{id}", delete(workflow::delete))
         .route("/v1/workflows/{id}", get(workflow::get))
         //
-        .route("/v1/workflows/{id}/contributions", get(contribution::list))
-        .route(
-            "/v1/workflows/{workflow_id}/contributions/{contribution_id}",
-            get(contribution::get),
-        )
-        //
         .route("/v1/workflows/{id}/allocations", get(allocation::list))
-        .route("/v1/workflows/{workflow_id}/allocations/{allocation_id}", get(allocation::get))
+        .route("/v1/workflows/{id}/allocations/{allocation_id}", get(allocation::get))
         //
-        .route("/v1/workflows/{id}/wallet-address", put(wallet::bind))
+        .route("/v1/workflows/{id}/contributions", get(contribution::list))
+        .route("/v1/workflows/{id}/contributions/{contribution_id}", get(contribution::get))
+        //
         .route("/v1/workflows/{id}/wallet-address", delete(wallet::unbind))
-        //
-        // Airdrop
-        .route("/v1/airdrops/{id}", get(airdrop::get))
-        .route("/v1/airdrops/{id}", post(airdrop::submit))
+        .route("/v1/workflows/{id}/wallet-address", put(wallet::bind))
+    //
 }

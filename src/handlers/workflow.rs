@@ -41,7 +41,7 @@ use crate::{
     responses(
         (status = 201, description = "Workflow created successfully", body = WorkflowResponse)
     ),
-    tag = "Workflows"
+    tag = "Workflow"
 )]
 pub async fn create(
     State(ctx): State<Arc<Context>>,
@@ -62,7 +62,7 @@ pub async fn create(
         (status = 404, description = "Workflow not found"),
         (status = 500, description = "Failed to delete workflow")
     ),
-    tag = "Workflows"
+    tag = "Workflow"
 )]
 pub async fn delete(
     State(ctx): State<Arc<Context>>,
@@ -85,7 +85,7 @@ pub async fn delete(
         (status = 404, description = "Workflow not found"),
         (status = 500, description = "Failed to get workflow")
     ),
-    tag = "Workflows"
+    tag = "Workflow"
 )]
 pub async fn get(
     State(ctx): State<Arc<Context>>,
