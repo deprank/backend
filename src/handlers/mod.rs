@@ -17,4 +17,5 @@ pub mod contribution;
 pub mod contributor;
 pub mod dependency;
 pub mod project;
+pub mod wallet;
 pub mod workflow;

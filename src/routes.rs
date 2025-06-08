@@ -15,13 +15,13 @@
 use std::sync::Arc;
 
 use axum::{
-    routing::{delete, get, post},
+    routing::{delete, get, post, put},
     Router,
 };
 
 use crate::{
     context::Context,
-    handlers::{allocation, contribution, contributor, dependency, project, workflow},
+    handlers::{allocation, contribution, contributor, dependency, project, wallet, workflow},
 };
 
 pub fn build() -> Router<Arc<Context>> {
@@ -48,4 +48,7 @@ pub fn build() -> Router<Arc<Context>> {
         //
         .route("/v1/workflows/{id}/allocations", get(allocation::list))
         .route("/v1/workflows/{workflow_id}/allocations/{allocation_id}", get(allocation::get))
+        //
+        .route("/v1/workflows/{id}/wallet-address", put(wallet::bind))
+        .route("/v1/workflows/{id}/wallet-address", delete(wallet::unbind))
 }

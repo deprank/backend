@@ -37,11 +37,15 @@ use crate::{handlers, requests, responses};
 
         handlers::allocation::list,
         handlers::allocation::get,
+
+        handlers::wallet::bind,
+        handlers::wallet::unbind,
     ),
     components(
         schemas(
             responses::project::ProjectResponse,
 
+            requests::workflow::BindWalletAddressRequest,
             requests::workflow::CreateWorkflowRequest,
             responses::workflow::WorkflowResponse,
         )
