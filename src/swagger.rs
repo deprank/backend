@@ -34,6 +34,9 @@ use crate::{handlers, requests, responses};
 
         handlers::contribution::list,
         handlers::contribution::get,
+
+        handlers::allocation::list,
+        handlers::allocation::get,
     ),
     components(
         schemas(
