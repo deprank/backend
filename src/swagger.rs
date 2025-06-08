@@ -64,7 +64,7 @@ use crate::{handlers, requests, responses};
         (name = "Workflow", description = "The Workflow Service Handlers"),
     ),
 )]
-struct ApiDoc;
+pub struct ApiDoc;
 
 pub fn build() -> SwaggerUi {
     SwaggerUi::new("/swagger").url("/openapi.json", ApiDoc::openapi())
