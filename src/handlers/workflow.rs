@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! The Workflow Service Handlers.
+
 use std::sync::Arc;
 
 use axum::{
@@ -26,8 +28,6 @@ use crate::{
     context::Context, errors::Result, requests::workflow::CreateWorkflowRequest,
     responses::workflow::WorkflowResponse, services::workflow::WorkflowService,
 };
-
-// The Workflow Service Handlers.
 
 /// Create a workflow in the current account.
 #[utoipa::path(
@@ -71,14 +71,14 @@ pub async fn delete(
     Ok(StatusCode::NO_CONTENT)
 }
 
-/// get a workflow
+/// Get a workflow
 #[utoipa::path(
-    post, path = "/v1/workflows/{id}",
+    get, path = "/v1/workflows/{id}",
     params(
         ("id" = Uuid, description = "The id of workflow"),
     ),
     responses(
-        (status = 204, description = "Workflow started successfully"),
+        (status = 200, description = "Workflow retrieved successfully"),
         (status = 404, description = "Workflow not found"),
         (status = 500, description = "Failed to get workflow")
     ),
@@ -88,5 +88,5 @@ pub async fn get(
     State(ctx): State<Arc<Context>>,
     Path(id): Path<Uuid>,
 ) -> Result<impl IntoResponse> {
-    Ok((StatusCode::CREATED, Json(WorkflowService::get(ctx, id).await?)))
+    Ok((StatusCode::OK, Json(WorkflowService::get(ctx, id).await?)))
 }

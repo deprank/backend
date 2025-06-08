@@ -20,17 +20,22 @@ use crate::{handlers, requests, responses};
 #[derive(OpenApi)]
 #[openapi(
     paths(
+        handlers::project::get,
+
         handlers::workflow::get,
         handlers::workflow::create,
         handlers::workflow::delete,
     ),
     components(
         schemas(
+            responses::project::ProjectResponse,
+
             requests::workflow::CreateWorkflowRequest,
             responses::workflow::WorkflowResponse,
         )
     ),
     tags(
+        (name = "Projects", description = "The Project Service Handlers"),
         (name = "Workflows", description = "The Workflow Service Handlers"),
     ),
 )]

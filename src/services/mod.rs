@@ -14,5 +14,6 @@
 
 pub mod analyzer;
 pub mod contract;
+pub mod project;
 pub mod storage;
 pub mod workflow;

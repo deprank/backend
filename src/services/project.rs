@@ -14,23 +14,12 @@
 
 use std::sync::Arc;
 
-use axum::{
-    routing::{delete, get, post},
-    Router,
-};
+use crate::{context::Context, errors::Result, responses::project::ProjectResponse};
 
-use crate::{
-    context::Context,
-    handlers::{project, workflow},
-};
+pub struct ProjectService;
 
-pub fn build() -> Router<Arc<Context>> {
-    Router::new()
-        // projects
-        .route("/v1/projects/{owner}/{name}", get(project::get))
-        //
-        // workflows
-        .route("/v1/workflows", post(workflow::create))
-        .route("/v1/workflows/{id}", delete(workflow::delete))
-        .route("/v1/workflows/{id}", get(workflow::get))
+impl ProjectService {
+    pub async fn get(_ctx: Arc<Context>, _owner: &str, _name: &str) -> Result<ProjectResponse> {
+        todo!()
+    }
 }
