@@ -40,12 +40,15 @@ use crate::{handlers, requests, responses};
 
         handlers::wallet::bind,
         handlers::wallet::unbind,
+
+        handlers::airdrop::get,
+        handlers::airdrop::submit,
     ),
     components(
         schemas(
             responses::project::ProjectResponse,
 
-            requests::workflow::BindWalletAddressRequest,
+            requests::wallet::WalletAddressRequest,
             requests::workflow::CreateWorkflowRequest,
             responses::workflow::WorkflowResponse,
         )
@@ -53,6 +56,7 @@ use crate::{handlers, requests, responses};
     tags(
         (name = "Projects", description = "The Project Service Handlers"),
         (name = "Workflows", description = "The Workflow Service Handlers"),
+        (name = "Airdrop", description = "The Airdrop Service Handlers"),
     ),
 )]
 struct ApiDoc;

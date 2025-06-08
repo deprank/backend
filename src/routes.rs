@@ -21,7 +21,9 @@ use axum::{
 
 use crate::{
     context::Context,
-    handlers::{allocation, contribution, contributor, dependency, project, wallet, workflow},
+    handlers::{
+        airdrop, allocation, contribution, contributor, dependency, project, wallet, workflow,
+    },
 };
 
 pub fn build() -> Router<Arc<Context>> {
@@ -51,4 +53,8 @@ pub fn build() -> Router<Arc<Context>> {
         //
         .route("/v1/workflows/{id}/wallet-address", put(wallet::bind))
         .route("/v1/workflows/{id}/wallet-address", delete(wallet::unbind))
+        //
+        // Airdrop
+        .route("/v1/airdrops/{id}", get(airdrop::get))
+        .route("/v1/airdrops/{id}", post(airdrop::submit))
 }

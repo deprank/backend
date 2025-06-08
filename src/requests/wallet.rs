@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod airdrop;
-pub mod allocation;
-pub mod contribution;
-pub mod contributor;
-pub mod dependency;
-pub mod project;
-pub mod wallet;
-pub mod workflow;
+use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct WalletAddressRequest {
+    /// The address of the wallet.
+    pub address: String,
+}

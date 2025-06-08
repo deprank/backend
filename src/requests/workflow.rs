@@ -31,9 +31,3 @@ pub struct CreateWorkflowRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rev: Option<String>,
 }
-
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
-pub struct BindWalletAddressRequest {
-    /// The address of the wallet.
-    pub address: String,
-}
