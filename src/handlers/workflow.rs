@@ -31,6 +31,7 @@ use crate::{
 
 /// Create a workflow in the current account.
 #[utoipa::path(
+    operation_id = "create-workflow",
     post, path = "/v1/workflows",
     request_body(
         content = inline(CreateWorkflowRequest),
@@ -51,6 +52,7 @@ pub async fn create(
 
 /// Delete a workflow
 #[utoipa::path(
+    operation_id = "delete-workflow",
     delete, path = "/v1/workflows/{id}",
     params(
         ("id" = Uuid, description = "The id of workflow"),
@@ -73,6 +75,7 @@ pub async fn delete(
 
 /// Get a workflow
 #[utoipa::path(
+    operation_id = "get-workflow-detail",
     get, path = "/v1/workflows/{id}",
     params(
         ("id" = Uuid, description = "The id of workflow"),

@@ -30,6 +30,7 @@ use crate::{
 
 /// Get a project
 #[utoipa::path(
+    operation_id = "get-project-detail",
     get, path = "/v1/projects/{owner}/{name}",
     params(
         ("owner" = String, description = "The owner of project"),

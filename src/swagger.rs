@@ -21,6 +21,8 @@ use crate::{handlers, requests, responses};
 #[openapi(
     paths(
         handlers::project::get,
+        handlers::dependency::list,
+        handlers::dependency::get,
 
         handlers::workflow::get,
         handlers::workflow::create,
