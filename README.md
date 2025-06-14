@@ -39,11 +39,35 @@ Cargo's global binary directory (`~/.cargo/bin/` by default).
 ## Usage
 
 ```text
-Usage: deprank-server --port <PORT>
+Usage: deprank-server [OPTIONS]
 
 Options:
-      --port <PORT>  The Server port [env: DRK_PORT=]
-  -h, --help         Print help
+      --port <PORT>
+          The Server port [env: DRK_PORT] [default: 8080]
+      --starknet-rpc-url <STARKNET_RPC_URL>
+          URL of the Starknet JSON-RPC endpoint [env: STARKNET_RPC_URL]
+      --starknet-private-key <STARKNET_PRIVATE_KEY>
+          Private key of the Starknet account [env: STARKNET_PRIVATE_KEY]
+      --starknet-account-address <STARKNET_ACCOUNT_ADDRESS>
+          Address of the Starknet account [env: STARKNET_ACCOUNT_ADDRESS]
+      --starknet-chain-id <STARKNET_CHAIN_ID>
+          Chain ID of the Starknet network [env: STARKNET_CHAIN_ID]
+      --allocation-contract-address <ALLOCATION_CONTRACT_ADDRESS>
+          Address of the Allocation contract [env: ALLOCATION_CONTRACT_ADDRESS]
+      --inquire-contract-address <INQUIRE_CONTRACT_ADDRESS>
+          Address of the Inquire contract [env: INQUIRE_CONTRACT_ADDRESS]
+      --receipt-contract-address <RECEIPT_CONTRACT_ADDRESS>
+          Address of the Receipt contract [env: RECEIPT_CONTRACT_ADDRESS]
+      --sign-contract-address <SIGN_CONTRACT_ADDRESS>
+          Address of the Sign contract [env: SIGN_CONTRACT_ADDRESS]
+      --workflow-contract-address <WORKFLOW_CONTRACT_ADDRESS>
+          Address of the Workflow contract [env: WORKFLOW_CONTRACT_ADDRESS]
+      --cache-dir <CACHE_DIR>
+          Base directory for storing cached repositories [env: CACHE_DIR]
+      --github-token <GITHUB_TOKEN>
+          A personal token to use for authentication [env: GITHUB_TOKEN]
+  -h, --help
+          Print help
 ```
 
 ## Development

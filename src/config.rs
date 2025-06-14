@@ -26,6 +26,8 @@
 //
 // See `.env.example` in the repository root for details.
 
+use std::path::PathBuf;
+
 use crate::contracts::impls::starknet::StarknetConfig;
 
 #[derive(Clone, clap::Parser)]
@@ -37,4 +39,12 @@ pub struct Config {
     /// The Starknet configuration.
     #[clap(flatten)]
     pub starknet_config: StarknetConfig,
+
+    /// Base directory for storing cached repositories
+    #[clap(long, env = "CACHE_DIR")]
+    pub cache_dir: PathBuf,
+
+    /// A personal token to use for authentication.
+    #[clap(long, env = "GITHUB_TOKEN")]
+    pub github_token: Option<String>,
 }
