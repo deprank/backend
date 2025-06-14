@@ -12,66 +12,96 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
+use anyhow::{anyhow, Context, Result};
+use axum::body::{to_bytes, Body};
+use flate2::read::GzDecoder;
 use ghrepo::GHRepo;
+use http_body_util::BodyExt;
+use octocrab::{
+    models::repos::Object,
+    params::repos::{Commitish, Reference},
+    Octocrab,
+};
 use std::{
     path::{Path, PathBuf},
-    process::Command,
+    sync::Arc,
 };
+use tar::Archive;
+use tokio::fs;
 use tracing::{info, warn};
-use uuid::Uuid;
 
-use crate::errors::ApiError;
-
+// Service for downloading and caching GitHub repositories
 pub struct StorageService {
-    cache_dir: PathBuf,
+    cache_dir: PathBuf,      // Base directory for storing cached repositories
+    octocrab: Arc<Octocrab>, // GitHub API client
 }
 
 impl StorageService {
-    pub fn new(cache_dir: &Path) -> Self {
-        Self { cache_dir: cache_dir.to_path_buf() }
+    // Creates new StorageService with optional GitHub token
+    pub fn new(cache_dir: &Path, github_token: Option<&str>) -> Result<Self> {
+        let octocrab = match github_token {
+            Some(token) => Arc::new(Octocrab::builder().personal_token(token.to_string()).build()?),
+            None => octocrab::instance(),
+        };
+
+        Ok(Self { cache_dir: cache_dir.to_path_buf(), octocrab })
     }
 
     /// Download and store GitHub repository,
     /// and return the path of the cached directory.
     pub async fn fetch(&self, url: &str) -> Result<PathBuf> {
-        // Extract repository name from URL
         let repo = GHRepo::from_url(url)?;
+        let api = self.octocrab.repos(repo.owner(), repo.name());
+
+        let repository = api.get().await.context("Failed to fetch repo info")?;
+
+        let reference = match repository.default_branch {
+            Some(branch) => {
+                let reference = api.get_ref(&Reference::Branch(branch.to_string())).await?;
+                match reference.object {
+                    Object::Commit { sha, .. } => sha,
+                    _ => return Err(anyhow!("Invalid reference type")),
+                }
+            }
+            None => return Err(anyhow!("No default branch found")),
+        };
 
         // Create project directory to store the repository,
-        // To avoid conflicts, create a subfolder with repository name + unique ID
-        // @FIXME: using repo's latest commit hash as subfolder
-        let dir = PathBuf::from(format!("{}/{}", repo, Uuid::new_v4().as_simple()));
+        // To avoid conflicts, create a subfolder with repository name + latest commit hash
+        let dir = PathBuf::from(format!("{}/{}", repo, reference));
 
         info!("Downloading repository {} to {:?}", repo, dir);
-        self.download(url, &dir).await?;
+        self.download(repo.owner(), repo.name(), &reference, &dir).await?;
 
         Ok(dir)
     }
 
-    async fn download(&self, url: &str, dir: &Path) -> Result<()> {
+    // Downloads and extracts GitHub repository tarball to cache directory
+    async fn download(&self, owner: &str, repo: &str, reference: &str, dir: &Path) -> Result<()> {
         let dir = self.cache_dir.join(dir);
 
         if dir.exists() {
-            warn!("Repository {} already exists in cache, skipping download", url);
+            warn!("Repository {} (commit {}) already cached", repo, reference);
             return Ok(());
         }
 
+        let tarball = self
+            .octocrab
+            .repos(owner, repo)
+            .download_tarball(Commitish::from(reference.to_string()))
+            .await
+            .context("Failed to download tarball")?;
+
+        let body = Body::from(tarball.collect().await?.to_bytes());
+        let bytes = to_bytes(body, usize::MAX).await.context("Failed to read tarball")?;
+
         // Create directory if it doesn't exist
-        std::fs::create_dir_all(&dir)?;
+        fs::create_dir_all(&dir).await?;
 
-        // Use git clone to download the repository
-        let output = Command::new("git")
-            .args(["clone", url, "--depth", "1", "."])
-            .current_dir(&dir)
-            .output()?;
+        let tar = GzDecoder::new(&bytes[..]);
+        let mut archive = Archive::new(tar);
+        archive.unpack(dir).context("Failed to unpack tarball")?;
 
-        if !output.status.success() {
-            let error = String::from_utf8_lossy(&output.stderr);
-            return Err(ApiError::FailedToDownloadRepo(error.to_string()).into());
-        }
-
-        info!("Repository {} downloaded and stored at {}", url, dir.display());
         Ok(())
     }
 }

@@ -24,7 +24,7 @@
 // For development convenience, these can also be read from a `.env` file in the working
 // directory where the application is started.
 //
-// See `.env.sample` in the repository root for details.
+// See `.env.example` in the repository root for details.
 
 use crate::contracts::impls::starknet::StarknetConfig;
 

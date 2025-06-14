@@ -12,21 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use url::Url;
+use tracing::metadata::LevelFilter;
+use tracing_subscriber::EnvFilter;
 
-use crate::errors::{ApiError, Result};
-
-/// Resolve the repo from the URL.
-pub fn repo(url: &str) -> Result<String> {
-    let url = Url::parse(url).map_err(ApiError::InvalidRepoAddress)?;
-    let mut repo = url.path().replace(".git", "");
-    repo = repo.trim_start_matches('/').to_string();
-
-    Ok(repo)
-}
-pub fn unwrap_or_error<T>(option: Option<T>, error_message: &str) -> Result<T, ApiError> {
-    match option {
-        Some(value) => Ok(value),
-        None => Err(ApiError::BadWorkflowRequest(error_message.to_string())),
-    }
+pub fn setup() {
+    let filter =
+        EnvFilter::builder().with_default_directive(LevelFilter::DEBUG.into()).from_env_lossy();
+    tracing_subscriber::fmt().with_env_filter(filter).init();
 }

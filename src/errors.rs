@@ -36,9 +36,6 @@ pub enum ApiError {
     #[error("Failed to delete workflow: {0}")]
     FailedToDeleteWorkflow(String),
 
-    #[error("InvalidRepoAddress: {0}")]
-    InvalidRepoAddress(#[source] url::ParseError),
-
     #[error("Not Found Repo: {0}")]
     NotFoundRepo(String),
 
@@ -51,17 +48,17 @@ pub enum ApiError {
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> axum::response::Response {
-        let (status, message) = match self {
-            Self::InternalServerError => (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()),
-            Self::NotFound => (StatusCode::NOT_FOUND, self.to_string()),
-            Self::NotFoundWorkflow(e) => (StatusCode::NOT_FOUND, e.to_string()),
-            Self::FailedToCreateWorkflow(e) => (StatusCode::BAD_REQUEST, e.to_string()),
-            Self::FailedToDeleteWorkflow(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
-            Self::InvalidRepoAddress(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
-            Self::NotFoundRepo(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
-            Self::BadWorkflowRequest(e) => (StatusCode::BAD_REQUEST, e.to_string()),
-            Self::FailedToDownloadRepo(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
+        let status = match self {
+            Self::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::NotFound => StatusCode::NOT_FOUND,
+            Self::NotFoundWorkflow(_) => StatusCode::NOT_FOUND,
+            Self::FailedToCreateWorkflow(_) => StatusCode::BAD_REQUEST,
+            Self::FailedToDeleteWorkflow(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::NotFoundRepo(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::BadWorkflowRequest(_) => StatusCode::BAD_REQUEST,
+            Self::FailedToDownloadRepo(_) => StatusCode::INTERNAL_SERVER_ERROR,
         };
+        let message = self.to_string();
 
         error!("{} - {}", status, message);
         (status, Json(json!({ "message": message }))).into_response()
