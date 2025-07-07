@@ -37,7 +37,7 @@ starknet = "0.15.1"
 starknet-ff = "0.3.7"
 tar = "0.4.44"
 thiserror = "2.0.12"
-tokio = { version = "1.45.1", features = ["full"] }
+tokio = { version = "1.46.1", features = ["full"] }
 toml = "0.8.23"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
