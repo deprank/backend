@@ -161,7 +161,7 @@ pub fn analyze_code(relative_path: &str) -> Result<ProjectAnalysis> {
         Ok(())
     })?;
 
-    println!("Total project code lines (excluding empty lines and comments): {}", total_code_lines);
+    println!("Total project code lines (excluding empty lines and comments): {total_code_lines}");
 
     // Build dependency usage
     let mut dependency_usage = Vec::new();
