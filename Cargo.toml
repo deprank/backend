@@ -36,7 +36,7 @@ serde_json = "1.0.142"
 starknet = "0.16.0"
 starknet-ff = "0.3.7"
 tar = "0.4.44"
-thiserror = "2.0.12"
+thiserror = "2.0.17"
 tokio = { version = "1.47.1", features = ["full"] }
 toml = "0.9.7"
 tracing = "0.1.41"
