@@ -22,7 +22,7 @@ name = "openapi-generator"
 path = "src/bin/openapi-generator.rs"
 
 [dependencies]
-anyhow = "1.0.98"
+anyhow = "1.0.100"
 axum = { version = "0.8.6" }
 clap = { version = "4.5.53", features = ["derive", "env"] }
 dotenv = "0.15.0"
